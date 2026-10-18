@@ -1,0 +1,4 @@
+# Copy to terraform.tfvars (git-ignored) and fill in real values.
+identity_center_region = "us-east-1"
+target_account_id      = "111111111111" # replace with your 12-digit lab account ID
+email_domain           = "example.com"  # use a domain/mailbox you control to receive invites

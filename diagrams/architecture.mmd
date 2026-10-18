@@ -1,0 +1,47 @@
+flowchart LR
+    subgraph People["Workforce (example users)"]
+        U1["jdoe.helpdesk<br/>tnguyen.helpdesk"]
+        U2["asmith.admin"]
+        U3["mlee.auditor"]
+        U4["rpatel.dev<br/>kbrown.dev"]
+    end
+
+    subgraph IDC["IAM Identity Center (identity store + MFA enforced)"]
+        G1["Group: HelpDesk"]
+        G2["Group: CloudAdmins"]
+        G3["Group: ReadOnlyAuditors"]
+        G4["Group: Developers"]
+        P1["PS: HelpDesk<br/>(custom, view EC2/IAM,<br/>explicit deny on changes)<br/>4h session"]
+        P2["PS: AdministratorAccess<br/>1h session"]
+        P3["PS: ViewOnlyAccess<br/>2h session"]
+        P4["PS: ReadOnlyAccess<br/>4h session"]
+    end
+
+    subgraph ORG["AWS Organizations"]
+        ACCT["Lab account<br/>(account ID via tfvars)"]
+        CT["CloudTrail event history<br/>(default 90 days, free)"]
+    end
+
+    subgraph COST["Cost guardrail (deployed first, us-east-1)"]
+        CW["CloudWatch alarm<br/>EstimatedCharges >= $5"]
+        SNS["SNS topic -> email"]
+    end
+
+    U1 --> G1
+    U2 --> G2
+    U3 --> G3
+    U4 --> G4
+    G1 -- assigned --> P1
+    G2 -- assigned --> P2
+    G3 -- assigned --> P3
+    G4 -- assigned --> P4
+    P1 --> ACCT
+    P2 --> ACCT
+    P3 --> ACCT
+    P4 --> ACCT
+    ACCT --> CT
+    CW --> SNS
+
+    REVIEW["Quarterly access review<br/>evidence/access-review-Q4-2026.xlsx"]
+    CT -. evidence .-> REVIEW
+    IDC -. export users/groups/assignments .-> REVIEW

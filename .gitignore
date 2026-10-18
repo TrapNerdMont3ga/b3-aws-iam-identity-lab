@@ -1,0 +1,37 @@
+# Terraform state and local data (may contain account IDs, ARNs, emails)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl.bak
+crash.log
+crash.*.log
+*.tfplan
+tfplan
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Variable files with real values; commit only *.tfvars.example
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# AWS credentials / local config
+.aws/
+credentials
+*.pem
+*.key
+.env
+.env.*
+
+# OS / editor / tooling
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+node_modules/
+~$*.xlsx

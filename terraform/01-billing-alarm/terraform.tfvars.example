@@ -1,0 +1,3 @@
+# Copy to terraform.tfvars (git-ignored) and fill in real values.
+alert_email   = "you@example.com"
+threshold_usd = 5
