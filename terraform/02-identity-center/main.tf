@@ -15,4 +15,18 @@ locals {
       }
     }
   ]...)
+
+  admin_count = length([for u in values(var.users) : u if contains(u.groups, "CloudAdmins")])
+}
+
+# Keep the privileged group small (AC-6(5)). Fails the plan if exceeded.
+resource "terraform_data" "admin_group_size_guard" {
+  input = local.admin_count
+
+  lifecycle {
+    precondition {
+      condition     = local.admin_count <= var.max_admins
+      error_message = "CloudAdmins has more members than max_admins allows. Privileged access must stay restricted to a small group."
+    }
+  }
 }

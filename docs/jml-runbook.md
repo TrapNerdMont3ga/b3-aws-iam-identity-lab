@@ -1,4 +1,4 @@
-# SOP: AWS Access - Joiner / Mover / Leaver (JML)
+# OptiPrim3 SOP: AWS Access - Joiner / Mover / Leaver (JML)
 
 | Field | Value |
 |---|---|
@@ -6,11 +6,11 @@
 | Version | 1.0 (lab) |
 | Owner | Service Desk Lead |
 | Approver | IT Manager / Cloud Platform Owner |
-| Applies to | AWS IAM Identity Center users, groups, and account assignments for the lab organization |
+| Applies to | AWS IAM Identity Center users, groups, and account assignments for the OptiPrim3 load-documentation app account |
 | Related controls | NIST 800-53 AC-2, AC-2(3), AC-5, AC-6, IA-2(1), IA-5 |
 | Review cycle | Annually, or after any finding from the quarterly access review |
 
-> Lab note: names, ticket numbers, and approvers in this document are examples.
+> Lab note: OptiPrim3 is a fictional logistics company. Names, ticket numbers, and approvers are examples. Group-to-permission-set details: [permission-set-matrix.md](permission-set-matrix.md).
 
 ## 1. Purpose
 
@@ -50,9 +50,11 @@ requester to open a ticket.
 
 | Access requested | Approver(s) |
 |---|---|
-| HelpDesk, Developers, ReadOnlyAuditors | User's manager |
-| CloudAdmins (AdministratorAccess) | User's manager **and** Cloud Platform Owner |
-| ReadOnlyAuditors for someone who is in CloudAdmins | Not allowed (separation of duties). Reject the request. |
+| HelpDesk, Developers | User's manager |
+| SecurityAnalysts | User's manager **and** Security Lead |
+| ReadOnlyAuditors | Compliance Manager |
+| CloudAdmins (AdministratorAccess) | User's manager **and** Cloud Platform Owner. Rejected if CloudAdmins is already at the limit (`max_admins`, default 2) unless someone is removed in the same change. |
+| ReadOnlyAuditors or SecurityAnalysts for someone in CloudAdmins (or the reverse) | Not allowed (separation of duties). Reject the request. Terraform also blocks it. |
 | Leaver / removal | No approval needed. HR notice or Security request is the authority. |
 
 Approvals must be recorded in the ticket by the approver (not forwarded in chat). The requester can't approve their own request.
@@ -83,6 +85,8 @@ Approvals must be recorded in the ticket by the approver (not forwarded in chat)
    - Identity Center > Users > user > **MFA devices** shows at least one device.
    - Access portal shows only the expected account and role (e.g. `HelpDesk`).
    - For HelpDesk: user can open EC2 > Instances; a test like `aws ec2 terminate-instances --instance-ids i-0123456789abcdef0 --dry-run` returns `UnauthorizedOperation`.
+   - For SecurityAnalysts: `aws cloudtrail lookup-events --max-results 5` works; `aws cloudtrail stop-logging --name <trail>` returns `AccessDenied`.
+   - For ReadOnlyAuditors: objects under the approved evidence prefix can be read; anything else in the bucket can't.
 6. **Evidence to attach to the ticket:** user detail screenshot (groups + MFA device, no secrets), `terraform plan` summary or console audit note, the user's confirmation of sign-in.
 7. Resolve the ticket. Resolution note: *User created, groups X, MFA verified, evidence attached.*
 
@@ -98,7 +102,7 @@ Approvals must be recorded in the ticket by the approver (not forwarded in chat)
    - **Console:** Groups > old group > remove user; new group > add user. Reconcile into Terraform within 1 business day.
 5. **Temporary elevation** (e.g. on-call admin): add to the group with an end date in the ticket and create a follow-up task on that date to remove it. No open-ended temporary access.
 6. **Return from leave:** re-enable the user (Users > user > Enable user access), confirm groups still match the current role, confirm the MFA device still works.
-7. **Verification:** user's groups match *After* in the ticket. Existing sessions keep old permissions until they expire (max 4h). For an urgent downgrade from CloudAdmins, also follow the session revocation step in 7.4.
+7. **Verification:** user's groups match *After* in the ticket. Existing sessions keep old permissions until they expire (max 4h). For an urgent downgrade from CloudAdmins or SecurityAnalysts, also revoke active sessions (section 7, step 4).
 8. **Evidence:** *Before* and *After* group lists, plan output or console audit note.
 
 ## 7. Leaver procedure
@@ -110,7 +114,7 @@ Approvals must be recorded in the ticket by the approver (not forwarded in chat)
 1. Confirm the request comes from HR or Security (or is backed by an HR notice). Managers alone can't trigger an involuntary termination.
 2. **Disable first** (fast and reversible): Identity Center > Users > user > **Disable user access**. This blocks new sign-ins immediately.
 3. **Remove group memberships** (Terraform: delete the user's entry, or set `groups = []` until deletion; Console: remove from each group). Record the *Before* group list in the ticket.
-4. **End active sessions** if the user was in CloudAdmins or the departure is involuntary: active portal sessions keep working until they expire. Revoke them (Identity Center > Users > user > **Active sessions** > delete sessions) and, for CloudAdmins, ask the Cloud Platform Owner to check CloudTrail for activity after the disable time.
+4. **End active sessions** if the user was in CloudAdmins or SecurityAnalysts, or the departure is involuntary: active portal sessions keep working until they expire. Revoke them (Identity Center > Users > user > **Active sessions** > delete sessions) and, for CloudAdmins, ask the Cloud Platform Owner to check CloudTrail for activity after the disable time.
 5. **Remove MFA devices** (Users > user > MFA devices > delete) so the device can't be reused if the account is re-enabled by mistake.
 6. **Delete the user** after 30 days (retention period for investigations), via Terraform (remove from `var.users`) or console. Rehires within 30 days are re-enabled instead.
 7. **Verification:** user status shows *Disabled*; no group memberships; a sign-in attempt fails. CloudTrail shows `DisableUser` / `DeleteGroupMembership` events with the time.

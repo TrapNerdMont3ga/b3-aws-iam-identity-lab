@@ -18,5 +18,7 @@ resource "aws_ssoadmin_account_assignment" "this" {
     aws_ssoadmin_managed_policy_attachment.read_only,
     aws_ssoadmin_managed_policy_attachment.view_only,
     aws_ssoadmin_permission_set_inline_policy.helpdesk,
+    aws_ssoadmin_permission_set_inline_policy.security_analyst,
+    aws_ssoadmin_permission_set_inline_policy.view_only_evidence,
   ]
 }

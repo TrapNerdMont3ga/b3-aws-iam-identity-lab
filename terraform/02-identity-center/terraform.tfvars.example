@@ -1,4 +1,9 @@
 # Copy to terraform.tfvars (git-ignored) and fill in real values.
 identity_center_region = "us-east-1"
-target_account_id      = "111111111111" # replace with your 12-digit lab account ID
+target_account_id      = "111111111111" # 12-digit ID of the OptiPrim3 load-docs app account
 email_domain           = "example.com"  # use a domain/mailbox you control to receive invites
+
+# Optional: approved compliance evidence bucket for ReadOnlyAuditors (leave "" to skip)
+evidence_bucket_name = ""
+evidence_prefix      = "approved-evidence/"
+max_admins           = 2

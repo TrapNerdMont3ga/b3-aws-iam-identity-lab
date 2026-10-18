@@ -1,4 +1,4 @@
-# Build checklist (to perform once AWS access exists)
+# Build checklist: OptiPrim3 identity lab (to perform once AWS access exists)
 
 Work top to bottom. Each **[SS ##]** is a screenshot to save in `screenshots/` with the file name from
 the README. Redact the account ID, emails, and the access portal URL before committing.
@@ -64,15 +64,23 @@ terraform apply tfplan
 ```bash
 cd ../02-identity-center
 cp terraform.tfvars.example terraform.tfvars   # set target_account_id, identity_center_region, email_domain
+                                                # optional: evidence_bucket_name (see 5a)
 terraform init
-terraform test                                  # offline tests, should be 3 passed
-terraform plan -out tfplan                      # expect: 4 groups, 6 users, 6 memberships,
-                                                # 4 permission sets, 3 policy attachments,
-                                                # 1 inline policy, 4 account assignments
+terraform test                                  # offline tests, should be 10 passed
+terraform plan -out tfplan                      # expect: 5 groups, 7 users, 7 memberships,
+                                                # 5 permission sets, 3 managed policy attachments,
+                                                # 2 inline policies (+1 if evidence bucket set),
+                                                # 5 account assignments, 1 admin-size guard
 terraform apply tfplan
 ```
 
 - [ ] Screenshot the plan summary. **[SS 08]**
+
+### 5a. Optional: approved evidence bucket for auditors
+
+- [ ] S3 > Create bucket (e.g. `optiprim3-compliance-evidence-<random>`), Block Public Access on, default encryption on.
+- [ ] Upload a sample file to `approved-evidence/` (e.g. the redacted review workbook) and another file outside that prefix (e.g. `drafts/`).
+- [ ] Set `evidence_bucket_name` in `terraform.tfvars`, then `terraform apply` again (adds 1 inline policy to ViewOnlyAccess).
 - [ ] Console: Groups list with member counts **[SS 09]**; Permission sets with session durations **[SS 10]**; AWS accounts > account > assigned groups and permission sets **[SS 11]**.
 - [ ] CLI cross-check (also used as review evidence):
   ```bash
@@ -101,6 +109,16 @@ Note: Terraform-created users get no invitation email automatically. For each te
   #   expect: AccessDenied ... with an explicit deny
   ```
   Screenshot both errors. **[SS 18]**
+- [ ] Sign in as `jgarcia.secanalyst` (profile `b3-secanalyst`, role SecurityAnalyst):
+  ```bash
+  aws cloudtrail lookup-events --max-results 5 --profile b3-secanalyst          # expect: events returned
+  aws cloudtrail stop-logging --name any-trail --profile b3-secanalyst          # expect: AccessDenied (explicit deny)
+  aws logs delete-log-group --log-group-name any --profile b3-secanalyst        # expect: AccessDenied
+  ```
+  Screenshot the successful lookup and the denials. **[SS 18b]**
+- [ ] If the evidence bucket exists, sign in as `mlee.auditor` and run
+  `aws s3 cp s3://<bucket>/approved-evidence/<file> - --profile b3-auditor` (works) and
+  `aws s3 cp s3://<bucket>/drafts/<file> - --profile b3-auditor` (AccessDenied).
 - [ ] Optional: sign in as `asmith.admin` and confirm the session ends after 1 hour.
 
 ## 7. Simulate the access review findings
@@ -108,7 +126,13 @@ Note: Terraform-created users get no invitation email automatically. For each te
 - [ ] **Drift / over-privilege (F-Q4-01):** as bootstrap admin, in the console add `kbrown.dev` to `CloudAdmins`. Run `python3 scripts/check_membership_drift.py`: it should print `DRIFT kbrown.dev: in ['CloudAdmins'] but not in Terraform`. Screenshot. **[SS 14]** Then remove kbrown.dev from CloudAdmins, re-run the script (`no drift`), and screenshot the user's groups. **[SS 13]**
 - [ ] **Stale account (F-Q4-02):** Users > `tnguyen.helpdesk` > **Disable user access**. **[SS 12]**
 - [ ] CloudTrail > Event history, filter Event source `sso-directory.amazonaws.com` / `identitystore.amazonaws.com` and `signin.amazonaws.com`: show the AddMemberToGroup / DisableUser and sign-in events. **[SS 19]**
-- [ ] Update `evidence/access-review-Q4-2026.xlsx` with real (redacted) last sign-in and MFA data, or keep the example data and note which rows were reproduced in the lab.
+- [ ] Last-sign-in evidence (closes F-Q4-03), run as SecurityAnalyst:
+  ```bash
+  aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventName,AttributeValue=Authenticate \
+    --start-time 2026-07-01 --query 'Events[].[EventTime,Username]' --output table --profile b3-secanalyst
+  ```
+  (Identity Center portal sign-ins are logged with event source `signin.amazonaws.com` / `sso.amazonaws.com`; adjust the event name to what appears in Event history.)
+- [ ] Update `evidence/access-review-Q4-2026.xlsx` and `docs/findings-and-remediation.md` with real (redacted) data, or keep the example data and note which rows were reproduced in the lab.
 
 Note on drift: Terraform only tracks memberships it created, so a console-added membership does not show in `terraform plan`. That is why the drift script exists, and it's a good talking point for interviews.
 
@@ -119,6 +143,7 @@ cd terraform/02-identity-center && terraform destroy
 ```
 
 - [ ] Delete any test EC2 instances (if launched). Check EC2 in every region used.
+- [ ] Disable GuardDuty / Security Hub / Config if you enabled them for testing; empty and delete the evidence bucket if created.
 - [ ] Remove `lamont.bootstrap` / `LabBootstrapAdmin` if the account will not be reused (do this last).
 - [ ] Keep `01-billing-alarm` (free). Billing > Bills shows $0.00. **[SS 20]**
 

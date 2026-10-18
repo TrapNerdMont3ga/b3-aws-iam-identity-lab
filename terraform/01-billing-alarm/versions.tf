@@ -17,6 +17,7 @@ provider "aws" {
     tags = {
       Project   = "b3-aws-iam-identity-lab"
       ManagedBy = "terraform"
+      Scenario  = "OptiPrim3"
       Purpose   = "cost-guardrail"
     }
   }
