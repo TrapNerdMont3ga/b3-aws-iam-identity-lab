@@ -12,7 +12,8 @@ Analyst work: provisioning, deprovisioning, MFA problems, "why can't I access X"
 
 > **Status (2026-10-18):** Deployed to AWS. Billing alarm, SNS topic, and $5 Budget are applied, plus all 35 Identity Center
 > resources, with every permission set provisioned. CLI proof is in [evidence/cli/](evidence/cli/) (account ID and email redacted).
-> Still to do, all in the console: MFA settings, user password setup, persona sign-in tests, screenshots. See [docs/build-checklist.md](docs/build-checklist.md).
+> Persona sign-ins (`jdoe.helpdesk`, `jgarcia.secanalyst`) were tested with MFA, and the denials are captured (screenshots 15 to 19).
+> Still pending: the remaining screenshots, the findings simulation, and teardown. See [docs/build-checklist.md](docs/build-checklist.md).
 
 ---
 
@@ -24,7 +25,7 @@ Analyst work: provisioning, deprovisioning, MFA problems, "why can't I access X"
 | Permission-set matrix | [docs/permission-set-matrix.md](docs/permission-set-matrix.md) |
 | Access-review report | [evidence/access-review-Q4-2026.xlsx](evidence/access-review-Q4-2026.xlsx) (example data) |
 | JML runbook | [docs/jml-runbook.md](docs/jml-runbook.md) |
-| MFA and least-privilege evidence | Screenshots 07, 15, 16, 17, 18, 18b (see [Screenshots](#screenshots)); policy tests in `terraform/02-identity-center/tests/`; IAM policy simulator results in [evidence/cli/11-policy-simulator.txt](evidence/cli/11-policy-simulator.txt) |
+| MFA and least-privilege evidence | Screenshots 15 to 19 (see [Screenshots](#screenshots)); CloudTrail MFA sign-ins in [13-mfa-signin-events.txt](evidence/cli/13-mfa-signin-events.txt); denied RunInstances/CreateBucket in [12-persona-denied-actions.txt](evidence/cli/12-persona-denied-actions.txt); IAM policy simulator in [11-policy-simulator.txt](evidence/cli/11-policy-simulator.txt); offline policy tests in `terraform/02-identity-center/tests/` |
 | Deployment proof (CLI) | [evidence/cli/](evidence/cli/), regenerate with `scripts/verify_identity_center.sh <account-id>` |
 | Findings and remediation | [docs/findings-and-remediation.md](docs/findings-and-remediation.md) (sample until real evidence exists) |
 
@@ -145,13 +146,27 @@ terraform plan && terraform apply
 
 ## Screenshots
 
-> **Placeholders.** These files don't exist yet. Capture them during the build (see the checklist), save them in `screenshots/` with these exact names, and redact the account ID, email addresses, and access portal URL before committing.
+The console header in these screenshots shows the AWS account ID. Account IDs aren't secret, so it's left visible.
 
-| # | File | Shows |
+### Captured
+
+| # | Screenshot | What it proves |
+|---|---|---|
+| 15 | [15-helpdesk-identity-center-denied.png](screenshots/15-helpdesk-identity-center-denied.png) | Signed in as `HelpDesk/jdoe.helpdesk`, the IAM Identity Center console returns "You need permissions". The service desk can't change identities or permission sets (explicit `Deny` on `sso:*`, `sso-directory:*`). |
+| 16 | [16-helpdesk-console-billing-securityhub-denied.png](screenshots/16-helpdesk-console-billing-securityhub-denied.png) | Same HelpDesk session: cost/billing widgets and `securityhub:DescribeHub` are access denied. HelpDesk sees only what its allow-list grants. |
+| 17 | [17-secanalyst-ec2-denied.png](screenshots/17-secanalyst-ec2-denied.png) | Signed in as `SecurityAnalyst/jgarcia.secanalyst`, the EC2 dashboard is mostly access denied (instances, volumes, security groups, `ec2:DescribeAvailabilityZones`). Security analysts get logs and findings, not infrastructure inventory. |
+| 18 | [18-secanalyst-cloudtrail-createtrail-denied.png](screenshots/18-secanalyst-cloudtrail-createtrail-denied.png) | SecurityAnalyst tries **Create trail**: `AccessDenied` on `s3:CreateBucket`, so no trail and no bucket were created. The analyst can't set up or change logging (CloudTrail writes are also explicitly denied). |
+| 19 | [19-cloudtrail-event-history.png](screenshots/19-cloudtrail-event-history.png) | CloudTrail event history (write events) as the SecurityAnalyst: persona sign-ins with `CredentialChallenge`/`CredentialVerification` (password + MFA). Also shows `jdoe.helpdesk` **RunInstances** (denied, `Client.UnauthorizedOperation`) and `jgarcia.secanalyst` **CreateBucket** (denied). The SecurityAnalyst can read the audit trail (AC-2(4), AU-6). |
+
+Supporting CLI proof for these: [evidence/cli/12-persona-denied-actions.txt](evidence/cli/12-persona-denied-actions.txt) (full error messages for the denied RunInstances and CreateBucket calls; 0 EC2 instances in any region afterward) and [evidence/cli/13-mfa-signin-events.txt](evidence/cli/13-mfa-signin-events.txt) (sign-ins with `CredentialType=PASSWORD,WEBAUTHN` and MFA device enrollment at first sign-in).
+
+### Pending
+
+| # | File to capture | Shows |
 |---|---|---|
 | 01 | `screenshots/01-root-mfa-enabled.png` | Root user has MFA |
 | 02 | `screenshots/02-billing-alerts-enabled.png` | Billing preferences: CloudWatch billing alerts on |
-| 03 | `screenshots/03-budget-5usd.png` | $5 AWS Budget |
+| 03 | `screenshots/03-budget-5usd.png` | $5 AWS Budget (created by Terraform) |
 | 04 | `screenshots/04-billing-alarm.png` | CloudWatch alarm `EstimatedCharges >= 5` |
 | 05 | `screenshots/05-sns-subscription-confirmed.png` | SNS email subscription Confirmed |
 | 06 | `screenshots/06-identity-center-enabled.png` | Identity Center settings: organization instance, region |
@@ -163,13 +178,11 @@ terraform plan && terraform apply
 | 12 | `screenshots/12-tnguyen-disabled.png` | Stale user disabled (F-Q4-02) |
 | 13 | `screenshots/13-kbrown-groups-after.png` | Over-privileged membership removed (F-Q4-01) |
 | 14 | `screenshots/14-drift-detected.png` | Drift script flagging the console-added admin membership |
-| 15 | `screenshots/15-mfa-registration-prompt.png` | First sign-in MFA registration as `jdoe.helpdesk` |
-| 16 | `screenshots/16-access-portal-helpdesk.png` | Access portal showing only the HelpDesk role |
-| 17 | `screenshots/17-helpdesk-ec2-view.png` | HelpDesk user can view EC2 instances |
-| 18 | `screenshots/18-helpdesk-denied.png` | HelpDesk denied on terminate / create IAM user |
-| 18b | `screenshots/18b-secanalyst-lookup-and-denied.png` | SecurityAnalyst: CloudTrail lookup works, `StopLogging` denied |
-| 19 | `screenshots/19-cloudtrail-identity-events.png` | CloudTrail event history: sign-in and Identity Store events |
 | 20 | `screenshots/20-teardown-bill-zero.png` | `terraform destroy` output and $0.00 bill |
+| 21 | `screenshots/21-mfa-registration-prompt.png` | First sign-in MFA registration prompt |
+| 22 | `screenshots/22-access-portal-helpdesk.png` | Access portal showing only the HelpDesk role |
+| 23 | `screenshots/23-helpdesk-ec2-view.png` | Positive test: HelpDesk can view EC2 instances |
+| 24 | `screenshots/24-secanalyst-cloudtrail-lookup.png` | Positive test: SecurityAnalyst can run a CloudTrail lookup |
 
 ## Future extension: OptiPrim3 Compliance Intelligence Assistant
 

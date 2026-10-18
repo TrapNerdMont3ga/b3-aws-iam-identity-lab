@@ -57,6 +57,22 @@
 | F-Q4-02 | Add leave-of-absence trigger to JML runbook | Lamont | Done | `docs/jml-runbook.md` section 2 |
 | F-Q4-03 | Saved last-sign-in query | Lamont | Open | - |
 
+## Live validation evidence (real, 2026-10-18)
+
+These are real results from the deployed lab, separate from the sample findings above. They are
+control tests that **passed**, not findings.
+
+| Test | Result | Evidence |
+|---|---|---|
+| HelpDesk user tries to launch an EC2 instance | `jdoe.helpdesk` **RunInstances** denied with `Client.UnauthorizedOperation` ("no identity-based policy allows the ec2:RunInstances action"). Confirmed in CloudTrail. 0 instances exist in any region. | `screenshots/19-cloudtrail-event-history.png`, `evidence/cli/12-persona-denied-actions.txt` |
+| SecurityAnalyst tries to create a CloudTrail trail | **CreateBucket** for the trail's log bucket denied (`AccessDenied`). No trail or bucket created. | `screenshots/18-secanalyst-cloudtrail-createtrail-denied.png`, `evidence/cli/12-persona-denied-actions.txt` |
+| HelpDesk opens Identity Center, billing, Security Hub | Access denied | `screenshots/15`, `screenshots/16` |
+| SecurityAnalyst opens the EC2 inventory | Access denied (outside role) | `screenshots/17` |
+| MFA at sign-in | Both personas enrolled an MFA device at first sign-in. Later sign-ins show `CredentialType=PASSWORD,WEBAUTHN`. | `evidence/cli/13-mfa-signin-events.txt`, `screenshots/19` |
+
+Observation: CloudTrail can see the denials, so a SecurityAnalyst-run query for `errorCode` =
+`*UnauthorizedOperation` / `AccessDenied` could be a weekly detection for privilege probing.
+
 ## What went well
 
 - Every account assignment is group-based, so each fix was a single membership change.

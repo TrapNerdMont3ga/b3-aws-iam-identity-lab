@@ -15,3 +15,5 @@ Regenerate with `bash scripts/verify_identity_center.sh <account-id>`.
 | 07 / 08 / 09 | Billing alarm (OK), SNS email subscription, $5 monthly Budget |
 | 10-membership-drift-check.txt | Live memberships == Terraform (no drift) |
 | 11-policy-simulator.txt | IAM policy simulator: reads allowed, destructive actions explicitly denied |
+| 12-persona-denied-actions.txt | CloudTrail: HelpDesk RunInstances and SecurityAnalyst CreateBucket both denied; 0 EC2 instances in any region |
+| 13-mfa-signin-events.txt | CloudTrail: persona sign-ins used password + WebAuthn MFA; MFA device enrolled at first sign-in |

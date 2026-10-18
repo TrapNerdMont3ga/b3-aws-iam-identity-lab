@@ -21,7 +21,8 @@ Nothing in this lab is expected to cost money.
 | 5. Identity Center resources applied | Done: 35 resources (5 groups, 7 users, 7 memberships, 5 permission sets, 3 managed + 2 inline policies, 5 assignments, 1 guard), all permission sets provisioned (SUCCEEDED) | `evidence/cli/02` to `06` |
 | Drift check | No drift | `evidence/cli/10-membership-drift-check.txt` |
 | Least-privilege check | IAM policy simulator: HelpDesk/SecurityAnalyst reads allowed, destructive actions explicitDeny | `evidence/cli/11-policy-simulator.txt` |
-| 6 to 7. Persona sign-in tests, findings simulation | **Pending**: needs user invitations / password setup in the console | Screenshots 12 to 19 |
+| 6. Persona sign-in tests | **Done** by Lamont: `jdoe.helpdesk` and `jgarcia.secanalyst` signed in with MFA. Denials captured. | Screenshots 15 to 19, `evidence/cli/12`, `13` |
+| 7. Findings simulation | Pending | Screenshots 12 to 14 |
 
 AWS access portal URL: `https://d-9066636886.awsapps.com/start`
 
@@ -111,9 +112,9 @@ Note: Terraform-created users get no invitation email, and the fictional `@examp
 
 ## 6. Test personas
 
-- [ ] Sign in as `jdoe.helpdesk` in a private browser window: set password, MFA registration prompt appears. **[SS 15]**
-- [ ] Access portal shows only the account with the **HelpDesk** role. **[SS 16]**
-- [ ] EC2 > Instances and IAM > Users load (view works). **[SS 17]**
+- [ ] Sign in as `jdoe.helpdesk` in a private browser window: set password, MFA registration prompt appears. **[SS 21]**
+- [ ] Access portal shows only the account with the **HelpDesk** role. **[SS 22]**
+- [ ] EC2 > Instances and IAM > Users load (view works). **[SS 23]**
 - [ ] Denied actions (no instance needed thanks to `--dry-run`; the IAM decision is evaluated first):
   ```bash
   aws configure sso   # profile b3-helpdesk, role HelpDesk
@@ -122,14 +123,14 @@ Note: Terraform-created users get no invitation email, and the fictional `@examp
   aws iam create-user --user-name should-fail --profile b3-helpdesk
   #   expect: AccessDenied ... with an explicit deny
   ```
-  Screenshot both errors. **[SS 18]**
+  Screenshot both errors. (Captured as console denials: SS 15, 16, 19.)
 - [ ] Sign in as `jgarcia.secanalyst` (profile `b3-secanalyst`, role SecurityAnalyst):
   ```bash
   aws cloudtrail lookup-events --max-results 5 --profile b3-secanalyst          # expect: events returned
   aws cloudtrail stop-logging --name any-trail --profile b3-secanalyst          # expect: AccessDenied (explicit deny)
   aws logs delete-log-group --log-group-name any --profile b3-secanalyst        # expect: AccessDenied
   ```
-  Screenshot the successful lookup and the denials. **[SS 18b]**
+  Screenshot the successful lookup **[SS 24]**. (Denials captured: SS 17, 18.)
 - [ ] If the evidence bucket exists, sign in as `mlee.auditor` and run
   `aws s3 cp s3://<bucket>/approved-evidence/<file> - --profile b3-auditor` (works) and
   `aws s3 cp s3://<bucket>/drafts/<file> - --profile b3-auditor` (AccessDenied).

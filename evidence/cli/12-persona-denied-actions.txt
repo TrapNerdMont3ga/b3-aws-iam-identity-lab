@@ -1,0 +1,15 @@
+Denied actions by persona roles (CloudTrail event history, aws cloudtrail lookup-events)
+
+eventTime   : 2026-10-18T18:48:31Z
+eventName   : RunInstances (ec2.amazonaws.com, us-east-1)
+principal   : arn:aws:sts::<ACCOUNT_ID>:assumed-role/AWSReservedSSO_HelpDesk_3cb2397a65b9b256/jdoe.helpdesk
+errorCode   : Client.UnauthorizedOperation
+errorMessage: You are not authorized to perform this operation. User: arn:aws:sts::<ACCOUNT_ID>:assumed-role/AWSReservedSSO_HelpDesk_3cb2397a65b9b256/jdoe.helpdesk is not authorized to perform: ec2:RunInstances on resource: arn:aws:ec2:us-east-1:<ACCOUNT_ID>:instance/* because no identity-based policy allows the ec2:RunInstances action. Encoded authorization failure message: <truncated>
+
+eventTime   : 2026-10-18T18:45:57Z
+eventName   : CreateBucket (s3.amazonaws.com, us-east-1)
+principal   : arn:aws:sts::<ACCOUNT_ID>:assumed-role/AWSReservedSSO_SecurityAnalyst_6f4de87f8f8b0e3c/jgarcia.secanalyst
+errorCode   : AccessDenied
+errorMessage: User: arn:aws:sts::<ACCOUNT_ID>:assumed-role/AWSReservedSSO_SecurityAnalyst_6f4de87f8f8b0e3c/jgarcia.secanalyst is not authorized to perform: s3:CreateBucket on resource: "arn:aws:s3:::aws-cloudtrail-logs-<ACCOUNT_ID>-fe19ba97" because no identity-based policy allows the s3:CreateBucket action
+
+Running/stopped EC2 instances across all enabled regions after the test: 0 (aws ec2 describe-instances per region).

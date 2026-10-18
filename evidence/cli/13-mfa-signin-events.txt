@@ -1,0 +1,16 @@
+Identity Center sign-in events showing MFA (CloudTrail event history)
+CredentialType PASSWORD,WEBAUTHN = password + MFA (security key / built-in authenticator).
+DEVICE_ENROLLMENT = MFA device registered at first sign-in.
+Note: userIdentity.sessionContext.mfaAuthenticated is 'false' on the federated role sessions;
+that field reflects IAM-level MFA, not Identity Center sign-in MFA, so these sign-in events are the MFA evidence.
+
+2026-10-18T19:04:06Z  UserAuthentication     jgarcia.secanalyst   CredentialType=PASSWORD,WEBAUTHN  result=['Success']
+2026-10-18T18:47:33Z  UserAuthentication     jdoe.helpdesk        CredentialType=PASSWORD,WEBAUTHN  result=['Success']
+2026-10-18T18:43:02Z  UserAuthentication     jgarcia.secanalyst   CredentialType=PASSWORD,DEVICE_ENROLLMENT,PASSWORD_CHANGE  result=['Success']
+2026-10-18T18:10:56Z  UserAuthentication     jdoe.helpdesk        CredentialType=PASSWORD,DEVICE_ENROLLMENT,PASSWORD_CHANGE  result=['Success']
+2026-10-18T19:04:06Z  CredentialVerification jgarcia.secanalyst   CredentialType=WEBAUTHN  result=['Success']
+2026-10-18T19:04:04Z  CredentialVerification jgarcia.secanalyst   CredentialType=PASSWORD  result=['Success']
+2026-10-18T18:47:33Z  CredentialVerification jdoe.helpdesk        CredentialType=WEBAUTHN  result=['Success']
+2026-10-18T18:47:28Z  CredentialVerification jdoe.helpdesk        CredentialType=PASSWORD  result=['Success']
+2026-10-18T18:42:16Z  CredentialVerification jgarcia.secanalyst   CredentialType=PASSWORD  result=['Success']
+2026-10-18T17:56:37Z  CredentialVerification jdoe.helpdesk        CredentialType=PASSWORD  result=['Success']
