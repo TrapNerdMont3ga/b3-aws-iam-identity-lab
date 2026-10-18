@@ -1,0 +1,24 @@
+$ aws sso-admin describe-instance --instance-arn arn:aws:sso:::instance/ssoins-722300836252a8bb --output json
+
+{
+    "InstanceArn": "arn:aws:sso:::instance/ssoins-722300836252a8bb",
+    "IdentityStoreId": "d-9066636886",
+    "IdentityStoreArn": "arn:aws:identitystore::<ACCOUNT_ID>:identitystore/d-9066636886",
+    "OwnerAccountId": "<ACCOUNT_ID>",
+    "CreatedDate": "2026-10-18T17:02:55.654000+00:00",
+    "Status": "ACTIVE",
+    "PrimaryRegion": "us-east-1",
+    "Regions": [
+        {
+            "RegionName": "us-east-1",
+            "Status": "ACTIVE",
+            "AddedDate": "2026-10-18T17:02:55.654000+00:00",
+            "IsPrimaryRegion": true
+        }
+    ],
+    "EncryptionConfigurationDetails": {
+        "KeyType": "AWS_OWNED_KMS_KEY",
+        "EncryptionStatus": "ENABLED"
+    },
+    "PermissionSetsEnabled": true
+}

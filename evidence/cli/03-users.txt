@@ -1,0 +1,15 @@
+$ aws identitystore list-users --identity-store-id d-9066636886 --query Users[].{UserName:UserName,DisplayName:DisplayName,Title:Title,Email:Emails[0].Value} --output table
+
+------------------------------------------------------------------------------------------------------------
+|                                                 ListUsers                                                |
++---------------+----------------------------------+---------------------------------+---------------------+
+|  DisplayName  |              Email               |              Title              |      UserName       |
++---------------+----------------------------------+---------------------------------+---------------------+
+|  Ravi Patel   |  rpatel.dev@example.com          |  Software Developer, Load Docs  |  rpatel.dev         |
+|  Alex Smith   |  asmith.admin@example.com        |  Cloud Administrator            |  asmith.admin       |
+|  Kim Brown    |  kbrown.dev@example.com          |  Software Developer, Load Docs  |  kbrown.dev         |
+|  Jane Doe     |  jdoe.helpdesk@example.com       |  Service Desk Analyst II        |  jdoe.helpdesk      |
+|  Tom Nguyen   |  tnguyen.helpdesk@example.com    |  Service Desk Analyst I         |  tnguyen.helpdesk   |
+|  Morgan Lee   |  mlee.auditor@example.com        |  IT Compliance Auditor          |  mlee.auditor       |
+|  Jordan Garcia|  jgarcia.secanalyst@example.com  |  Security Analyst               |  jgarcia.secanalyst |
++---------------+----------------------------------+---------------------------------+---------------------+

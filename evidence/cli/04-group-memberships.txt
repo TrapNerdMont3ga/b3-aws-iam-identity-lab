@@ -1,0 +1,9 @@
+Group memberships (resolved to usernames)
+
+CloudAdmins        asmith.admin
+Developers         kbrown.dev
+Developers         rpatel.dev
+HelpDesk           jdoe.helpdesk
+HelpDesk           tnguyen.helpdesk
+ReadOnlyAuditors   mlee.auditor
+SecurityAnalysts   jgarcia.secanalyst

@@ -1,0 +1,9 @@
+$ aws budgets describe-budgets --account-id <ACCOUNT_ID> --query Budgets[].{Name:BudgetName,Limit:BudgetLimit.Amount,Unit:BudgetLimit.Unit,TimeUnit:TimeUnit,Type:BudgetType} --output table
+
+-------------------------------------------------------------------
+|                         DescribeBudgets                         |
++-------+----------------------------+-----------+-------+--------+
+| Limit |           Name             | TimeUnit  | Type  | Unit   |
++-------+----------------------------+-----------+-------+--------+
+|  5.0  |  b3-iam-lab-monthly-5-usd  |  MONTHLY  |  COST |  USD   |
++-------+----------------------------+-----------+-------+--------+

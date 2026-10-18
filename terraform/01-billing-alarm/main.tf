@@ -31,3 +31,29 @@ resource "aws_cloudwatch_metric_alarm" "estimated_charges" {
   alarm_actions = [aws_sns_topic.billing_alerts.arn]
   ok_actions    = [aws_sns_topic.billing_alerts.arn]
 }
+
+# Belt and braces: an AWS Budget uses Cost Explorer data (includes charges the CloudWatch
+# metric can lag on) and emails directly. Budgets without actions are free.
+resource "aws_budgets_budget" "monthly" {
+  name         = "${var.name_prefix}-monthly-${var.threshold_usd}-usd"
+  budget_type  = "COST"
+  limit_amount = format("%.2f", var.threshold_usd)
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = [var.alert_email]
+  }
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 100
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "FORECASTED"
+    subscriber_email_addresses = [var.alert_email]
+  }
+}

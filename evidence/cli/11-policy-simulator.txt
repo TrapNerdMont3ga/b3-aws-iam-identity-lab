@@ -1,0 +1,38 @@
+IAM policy simulator (aws iam simulate-custom-policy) against the deployed inline policies
+
+== HelpDesk
+----------------------------------------------
+|            SimulateCustomPolicy            |
++---------------------------+----------------+
+|  ec2:DescribeInstances    |  allowed       |
+|  iam:ListUsers            |  allowed       |
+|  iam:GetUser              |  allowed       |
+|  ec2:TerminateInstances   |  explicitDeny  |
+|  ec2:StopInstances        |  explicitDeny  |
+|  iam:CreateUser           |  explicitDeny  |
+|  iam:AttachUserPolicy     |  explicitDeny  |
+|  iam:DeactivateMFADevice  |  explicitDeny  |
+|  sso:CreatePermissionSet  |  explicitDeny  |
+|  identitystore:CreateUser |  explicitDeny  |
++---------------------------+----------------+
+
+== SecurityAnalyst
+------------------------------------------------------
+|                SimulateCustomPolicy                |
++-----------------------------------+----------------+
+|  cloudtrail:LookupEvents          |  allowed       |
+|  logs:FilterLogEvents             |  allowed       |
+|  logs:StartQuery                  |  allowed       |
+|  guardduty:ListFindings           |  allowed       |
+|  securityhub:GetFindings          |  allowed       |
+|  config:DescribeConfigRules       |  allowed       |
+|  access-analyzer:ListFindings     |  allowed       |
+|  cloudtrail:StopLogging           |  explicitDeny  |
+|  cloudtrail:DeleteTrail           |  explicitDeny  |
+|  logs:DeleteLogGroup              |  explicitDeny  |
+|  guardduty:DeleteDetector         |  explicitDeny  |
+|  securityhub:BatchUpdateFindings  |  explicitDeny  |
+|  config:StopConfigurationRecorder |  explicitDeny  |
+|  iam:CreateUser                   |  explicitDeny  |
+|  s3:GetObject                     |  implicitDeny  |
++-----------------------------------+----------------+

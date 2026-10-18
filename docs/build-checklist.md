@@ -7,6 +7,24 @@ the README. Redact the account ID, emails, and the access portal URL before comm
 login + root MFA device, an email address for billing alerts, and approval that the lab stays at $0.
 Nothing in this lab is expected to cost money.
 
+
+## Deployment status (2026-10-18)
+
+| Step | Status | Evidence |
+|---|---|---|
+| 0. Root MFA, billing alerts preference | Requested of Lamont. AWS/Billing metrics already publish (EstimatedCharges is available), so the alarm works. | Screenshots 01, 02 pending |
+| 0. $5 Budget | **Done with Terraform** (`aws_budgets_budget` in 01-billing-alarm) instead of the console | `evidence/cli/09-budget.txt` |
+| 1. Identity Center enabled (org instance, us-east-1) | Done by Lamont | `evidence/cli/01-sso-instance.txt` |
+| 2. MFA settings | **Pending, console only (Lamont)** | Screenshot 07 |
+| 3. Terraform credentials | Temporary IAM user via env vars | `evidence/cli/00-caller-identity.txt` |
+| 4. Billing alarm + SNS + Budget applied | Done, 4 resources. **SNS email subscription is PendingConfirmation**, so Lamont must click the confirmation link. | `evidence/cli/07`, `08`, `09` |
+| 5. Identity Center resources applied | Done: 35 resources (5 groups, 7 users, 7 memberships, 5 permission sets, 3 managed + 2 inline policies, 5 assignments, 1 guard), all permission sets provisioned (SUCCEEDED) | `evidence/cli/02` to `06` |
+| Drift check | No drift | `evidence/cli/10-membership-drift-check.txt` |
+| Least-privilege check | IAM policy simulator: HelpDesk/SecurityAnalyst reads allowed, destructive actions explicitDeny | `evidence/cli/11-policy-simulator.txt` |
+| 6 to 7. Persona sign-in tests, findings simulation | **Pending**: needs user invitations / password setup in the console | Screenshots 12 to 19 |
+
+AWS access portal URL: `https://d-9066636886.awsapps.com/start`
+
 ## 0. Account hygiene and cost guardrail (console, as root, done once)
 
 - [ ] Sign in as root. Account menu > **Security credentials** > Assign MFA device (authenticator app or security key). **[SS 01]**
@@ -28,23 +46,19 @@ Nothing in this lab is expected to cost money.
   - If a user does not yet have a registered MFA device: **Require them to register an MFA device at sign in**
 - [ ] Save. **[SS 07]**
 
-## 3. Bootstrap admin for Terraform (console, then CLI)
+## 3. Credentials for Terraform (as deployed: temporary IAM user, no bootstrap SSO user)
 
-This avoids creating IAM access keys. It is the only manual identity and is removed at teardown.
+The deployed lab used a dedicated IAM user, `tech-operator-lab` (AdministratorAccess), with an
+access key supplied **only** through the `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` environment
+variables. The key is never written to disk, logged, or committed. No bootstrap SSO user or
+`LabBootstrapAdmin` permission set was created.
 
-- [ ] Identity Center > Permission sets > Create > Predefined > AdministratorAccess, name it **`LabBootstrapAdmin`**, session 1 hour.
-- [ ] Users > Add user `lamont.bootstrap` (Lamont's real email). Accept the invite, set password, register MFA.
-- [ ] AWS accounts > select the account > Assign users or groups > `lamont.bootstrap` > `LabBootstrapAdmin`.
-- [ ] Sign out of root. From now on, use the access portal.
-- [ ] On the workstation:
-  ```bash
-  aws configure sso            # SSO start URL = access portal URL, region = Identity Center region
-                               # choose LabBootstrapAdmin, profile name: b3-lab
-  aws sso login --profile b3-lab
-  export AWS_PROFILE=b3-lab
-  aws sts get-caller-identity  # confirm the AWSReservedSSO_LabBootstrapAdmin role
-  aws sso-admin list-instances # confirm InstanceArn and IdentityStoreId
-  ```
+- [x] IAM user `tech-operator-lab` created by Lamont, key passed through env vars only.
+- [x] `aws sts get-caller-identity` shows `arn:aws:iam::<ACCOUNT_ID>:user/tech-operator-lab` (`evidence/cli/00-caller-identity.txt`).
+- [ ] **At teardown, delete this IAM user and its access key** (section 8). It's the only long-lived credential in the lab.
+
+Alternative (no access keys at all): create a bootstrap Identity Center user with an admin permission
+set, then `aws configure sso` / `aws sso login`. Prefer this for any account that stays in use.
 
 ## 4. Deploy the billing alarm (Terraform, first)
 
@@ -93,7 +107,7 @@ terraform apply tfplan
     --account-id <ACCOUNT_ID> --permission-set-arn <PS_ARN>
   ```
 
-Note: Terraform-created users get no invitation email automatically. For each test persona you plan to sign in as, open Users > user > **Send email verification link** / **Reset password** > send email. Emails are built as `<username>@<email_domain>`, so set `email_domain` to a domain you control with a catch-all mailbox, or change the persona's email in the console, so you can receive them.
+Note: Terraform-created users get no invitation email, and the fictional `@example.com` addresses can't receive mail anyway. To sign in as a persona, open IAM Identity Center > Users > user > **Reset password** > **Generate a one-time password and share the password with the user**. Copy it straight into a private browser window and don't store it anywhere. Do this only for the personas you test (at least `jdoe.helpdesk` and `jgarcia.secanalyst`).
 
 ## 6. Test personas
 
@@ -123,7 +137,7 @@ Note: Terraform-created users get no invitation email automatically. For each te
 
 ## 7. Simulate the access review findings
 
-- [ ] **Drift / over-privilege (F-Q4-01):** as bootstrap admin, in the console add `kbrown.dev` to `CloudAdmins`. Run `python3 scripts/check_membership_drift.py`: it should print `DRIFT kbrown.dev: in ['CloudAdmins'] but not in Terraform`. Screenshot. **[SS 14]** Then remove kbrown.dev from CloudAdmins, re-run the script (`no drift`), and screenshot the user's groups. **[SS 13]**
+- [ ] **Drift / over-privilege (F-Q4-01):** as an admin (Lamont's console session), add `kbrown.dev` to `CloudAdmins`. Run `python3 scripts/check_membership_drift.py`: it should print `DRIFT kbrown.dev: in ['CloudAdmins'] but not in Terraform`. Screenshot. **[SS 14]** Then remove kbrown.dev from CloudAdmins, re-run the script (`no drift`), and screenshot the user's groups. **[SS 13]**
 - [ ] **Stale account (F-Q4-02):** Users > `tnguyen.helpdesk` > **Disable user access**. **[SS 12]**
 - [ ] CloudTrail > Event history, filter Event source `sso-directory.amazonaws.com` / `identitystore.amazonaws.com` and `signin.amazonaws.com`: show the AddMemberToGroup / DisableUser and sign-in events. **[SS 19]**
 - [ ] Last-sign-in evidence (closes F-Q4-03), run as SecurityAnalyst:
@@ -144,7 +158,8 @@ cd terraform/02-identity-center && terraform destroy
 
 - [ ] Delete any test EC2 instances (if launched). Check EC2 in every region used.
 - [ ] Disable GuardDuty / Security Hub / Config if you enabled them for testing; empty and delete the evidence bucket if created.
-- [ ] Remove `lamont.bootstrap` / `LabBootstrapAdmin` if the account will not be reused (do this last).
+- [ ] Keep or destroy `01-billing-alarm` (SNS topic, CloudWatch alarm, $5 Budget, all free).
+- [ ] Delete the `tech-operator-lab` IAM user and its access key last: IAM > Users > tech-operator-lab > Security credentials > deactivate and delete the key, then delete the user. Confirm with `aws iam list-users`.
 - [ ] Keep `01-billing-alarm` (free). Billing > Bills shows $0.00. **[SS 20]**
 
 ## 9. Publish

@@ -1,0 +1,13 @@
+$ aws identitystore list-groups --identity-store-id d-9066636886 --query Groups[].{Group:DisplayName,Description:Description,GroupId:GroupId} --output table
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+|                                                                       ListGroups                                                                        |
++--------------------------------------------------------------------------------------------+-------------------+----------------------------------------+
+|                                         Description                                        |       Group       |                GroupId                 |
++--------------------------------------------------------------------------------------------+-------------------+----------------------------------------+
+|  Internal audit / GRC: resource metadata plus read access to approved compliance evidence. |  ReadOnlyAuditors |  64d894e8-3041-704a-5261-c1c57c017fd2  |
+|  OptiPrim3 cloud administrators: full admin, 1 hour sessions, small group, MFA required.   |  CloudAdmins      |  b438d428-a0c1-70fc-6cda-cb54b29d2064  |
+|  Load-documentation app developers: read-only access to the app account.                   |  Developers       |  a4b8e4d8-1021-703b-1d70-b35eaf639582  |
+|  OptiPrim3 security operations: read-only access to security logs and findings.            |  SecurityAnalysts |  b44834c8-5061-70bf-b51b-77a367e67777  |
+|  OptiPrim3 service desk: view-only troubleshooting of EC2 and IAM. No changes.             |  HelpDesk         |  04e8d478-20c1-709c-6e02-609f01b6615f  |
++--------------------------------------------------------------------------------------------+-------------------+----------------------------------------+

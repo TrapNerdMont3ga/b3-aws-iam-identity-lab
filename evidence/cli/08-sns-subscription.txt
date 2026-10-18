@@ -1,0 +1,9 @@
+$ aws sns list-subscriptions --region us-east-1 --query Subscriptions[?contains(TopicArn,`b3-iam-lab`)].{Protocol:Protocol,Endpoint:Endpoint,Subscription:SubscriptionArn} --output table
+
+-------------------------------------------------------------------
+|                        ListSubscriptions                        |
++-----------------------------+-----------+-----------------------+
+|          Endpoint           | Protocol  |     Subscription      |
++-----------------------------+-----------+-----------------------+
+|  <ALERT_EMAIL> |  email    |  PendingConfirmation  |
++-----------------------------+-----------+-----------------------+

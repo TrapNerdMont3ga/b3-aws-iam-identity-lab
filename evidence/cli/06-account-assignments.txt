@@ -1,0 +1,20 @@
+Account assignments in <ACCOUNT_ID> and provisioning status
+
+AdministratorAccess  -> GROUP  CloudAdmins        (provisioned to account)
+HelpDesk             -> GROUP  HelpDesk           (provisioned to account)
+ReadOnlyAccess       -> GROUP  Developers         (provisioned to account)
+SecurityAnalyst      -> GROUP  SecurityAnalysts   (provisioned to account)
+ViewOnlyAccess       -> GROUP  ReadOnlyAuditors   (provisioned to account)
+
+Recent provisioning operations:
+---------------------------------------------------
+|       ListPermissionSetProvisioningStatus       |
++-----------------------------------+-------------+
+|              Created              |   Status    |
++-----------------------------------+-------------+
+|  2026-10-18T17:15:31.831000+00:00 |  SUCCEEDED  |
+|  2026-10-18T17:15:30.010000+00:00 |  SUCCEEDED  |
+|  2026-10-18T17:15:29.826000+00:00 |  SUCCEEDED  |
+|  2026-10-18T17:15:29.765000+00:00 |  SUCCEEDED  |
+|  2026-10-18T17:15:29.721000+00:00 |  SUCCEEDED  |
++-----------------------------------+-------------+

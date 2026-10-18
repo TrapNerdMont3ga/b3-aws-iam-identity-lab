@@ -7,3 +7,8 @@ output "alarm_name" {
   description = "Name of the CloudWatch billing alarm."
   value       = aws_cloudwatch_metric_alarm.estimated_charges.alarm_name
 }
+
+output "budget_name" {
+  description = "Name of the monthly AWS Budget."
+  value       = aws_budgets_budget.monthly.name
+}

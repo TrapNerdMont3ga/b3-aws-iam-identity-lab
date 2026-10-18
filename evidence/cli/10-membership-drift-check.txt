@@ -1,0 +1,4 @@
+$ python3 scripts/check_membership_drift.py
+
+Result: no drift
+exit=0

@@ -10,8 +10,9 @@ Built by Lamont as a portfolio project. Background: about 2 years in IT support,
 AWS Certified Cloud Practitioner. The lab is aimed at Service Desk / IT Support Tier 2 and IAM
 Analyst work: provisioning, deprovisioning, MFA problems, "why can't I access X", and audit evidence.
 
-> **Status:** Scaffold complete and validated offline (`terraform validate`, plus 10 `terraform test` cases with a mocked provider).
-> The AWS build and screenshots are pending. See [docs/build-checklist.md](docs/build-checklist.md).
+> **Status (2026-10-18):** Deployed to AWS. Billing alarm, SNS topic, and $5 Budget are applied, plus all 35 Identity Center
+> resources, with every permission set provisioned. CLI proof is in [evidence/cli/](evidence/cli/) (account ID and email redacted).
+> Still to do, all in the console: MFA settings, user password setup, persona sign-in tests, screenshots. See [docs/build-checklist.md](docs/build-checklist.md).
 
 ---
 
@@ -23,7 +24,8 @@ Analyst work: provisioning, deprovisioning, MFA problems, "why can't I access X"
 | Permission-set matrix | [docs/permission-set-matrix.md](docs/permission-set-matrix.md) |
 | Access-review report | [evidence/access-review-Q4-2026.xlsx](evidence/access-review-Q4-2026.xlsx) (example data) |
 | JML runbook | [docs/jml-runbook.md](docs/jml-runbook.md) |
-| MFA and least-privilege evidence | Screenshots 07, 15, 16, 17, 18, 18b (see [Screenshots](#screenshots)); policy tests in `terraform/02-identity-center/tests/` |
+| MFA and least-privilege evidence | Screenshots 07, 15, 16, 17, 18, 18b (see [Screenshots](#screenshots)); policy tests in `terraform/02-identity-center/tests/`; IAM policy simulator results in [evidence/cli/11-policy-simulator.txt](evidence/cli/11-policy-simulator.txt) |
+| Deployment proof (CLI) | [evidence/cli/](evidence/cli/), regenerate with `scripts/verify_identity_center.sh <account-id>` |
 | Findings and remediation | [docs/findings-and-remediation.md](docs/findings-and-remediation.md) (sample until real evidence exists) |
 
 ## Goal
@@ -83,11 +85,13 @@ Related: AC-5 (Separation of Duties) through the SoD validation rule.
 │   ├── jml-runbook.md                joiner/mover/leaver service desk SOP
 │   └── permission-set-matrix.md      persona/group/permission set matrix
 ├── evidence/
+│   ├── cli/                          redacted CLI proof of the live deployment
 │   ├── access-review-Q4-2026.xlsx    EXAMPLE DATA quarterly access review
 │   └── build_access_review.py        regenerates the workbook (openpyxl)
 ├── screenshots/         filled in after the AWS build
 ├── scripts/
-│   └── check_membership_drift.py     flags console-added group memberships
+│   ├── check_membership_drift.py     flags console-added group memberships
+│   └── verify_identity_center.sh     collects redacted CLI evidence into evidence/cli/
 └── terraform/
     ├── 01-billing-alarm/       deploy FIRST: CloudWatch billing alarm + SNS email (us-east-1)
     └── 02-identity-center/     groups, users, permission sets, account assignments
@@ -98,10 +102,10 @@ Related: AC-5 (Separation of Duties) through the SoD validation rule.
 
 Full steps are in [docs/build-checklist.md](docs/build-checklist.md). In short:
 
-1. **Secure the account and set the cost guardrail first.** MFA on the root user, enable "Receive CloudWatch billing alerts", create a $5 AWS Budget in the console.
-2. **Enable IAM Identity Center** (organization instance; this also enables AWS Organizations). Create one manual bootstrap admin so Terraform can run with temporary SSO credentials instead of access keys.
+1. **Secure the account and set the cost guardrail first.** MFA on the root user, and enable "Receive CloudWatch billing alerts". The $5 AWS Budget is created by `01-billing-alarm`.
+2. **Enable IAM Identity Center** (organization instance; this also enables AWS Organizations). Terraform ran with a dedicated temporary IAM user whose key lived only in environment variables. That user is deleted at teardown.
 3. **Configure MFA**: prompt on every sign-in, require registration at first sign-in.
-4. **Deploy `terraform/01-billing-alarm`**: a CloudWatch `EstimatedCharges >= $5` alarm that emails through SNS. Confirm the subscription email.
+4. **Deploy `terraform/01-billing-alarm`**: a CloudWatch `EstimatedCharges >= $5` alarm that emails through SNS, plus a $5 monthly AWS Budget (email at 80% actual and 100% forecast). Confirm the subscription email.
 5. **Deploy `terraform/02-identity-center`**: 5 groups, 7 example users, 5 permission sets, group-to-account assignments.
 6. **Test as each persona.** The HelpDesk user can view EC2/IAM, but terminate and IAM create are denied. The SecurityAnalyst can run CloudTrail lookups but is denied `StopLogging`.
 7. **Simulate the review findings.** Add `kbrown.dev` to CloudAdmins in the console (drift) and catch it with `scripts/check_membership_drift.py` (Terraform's plan won't see it), then remediate. Disable the stale `tnguyen.helpdesk` account.
@@ -134,9 +138,9 @@ terraform plan && terraform apply
 
 1. `cd terraform/02-identity-center && terraform destroy` removes assignments, permission sets, users, and groups.
 2. Terminate any test EC2 instance. Disable GuardDuty, Security Hub, and Config if you enabled them. Empty and delete the evidence bucket if you created one.
-3. In Identity Center, delete the bootstrap user and the `LabBootstrapAdmin` permission set last, or keep them if the account stays in use.
+3. Delete the `tech-operator-lab` IAM user and its access key last (the only long-lived credential used).
 4. Optional: Identity Center > Settings > Delete IAM Identity Center configuration.
-5. Keep `01-billing-alarm` (it's free), or remove it with `terraform destroy` in that folder.
+5. Keep `01-billing-alarm` (alarm, SNS, and Budget are free), or remove it with `terraform destroy` in that folder.
 6. Check Billing > Bills: expected $0.00.
 
 ## Screenshots

@@ -1,0 +1,11 @@
+$ aws cloudwatch describe-alarms --region us-east-1 --alarm-name-prefix b3-iam-lab --query MetricAlarms[].{Name:AlarmName,Metric:MetricName,Threshold:Threshold,State:StateValue,Period:Period} --output table
+
+----------------------------------------------------------
+|                     DescribeAlarms                     |
++-----------+--------------------------------------------+
+|  Metric   |  EstimatedCharges                          |
+|  Name     |  b3-iam-lab-estimated-charges-over-5-usd   |
+|  Period   |  21600                                     |
+|  State    |  OK                                        |
+|  Threshold|  5.0                                       |
++-----------+--------------------------------------------+

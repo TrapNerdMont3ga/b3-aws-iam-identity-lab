@@ -1,0 +1,222 @@
+Permission sets: session duration, managed policies, inline policy
+
+{
+    "Name": "AdministratorAccess",
+    "SessionDuration": "PT1H",
+    "Description": "Full admin for a small group. 1h session to limit privileged exposure.",
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-000733998d1e4214"
+}
+Managed policies:
+[
+    "arn:aws:iam::aws:policy/AdministratorAccess"
+]
+Inline policy:
+(none)
+----------------------------------------------------------------
+{
+    "Name": "SecurityAnalyst",
+    "SessionDuration": "PT4H",
+    "Description": "Read-only access to security logs and findings. No write.",
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-8bffb71b29ec6e0a"
+}
+Managed policies:
+[]
+Inline policy:
+{
+    "Statement": [
+        {
+            "Action": [
+                "cloudtrail:LookupEvents",
+                "cloudtrail:DescribeTrails",
+                "cloudtrail:GetTrail",
+                "cloudtrail:GetTrailStatus",
+                "cloudtrail:ListTrails",
+                "cloudtrail:GetEventSelectors",
+                "cloudtrail:GetInsightSelectors",
+                "cloudtrail:ListTags",
+                "logs:DescribeLogGroups",
+                "logs:DescribeLogStreams",
+                "logs:GetLogEvents",
+                "logs:FilterLogEvents",
+                "logs:StartQuery",
+                "logs:StopQuery",
+                "logs:GetQueryResults",
+                "logs:DescribeQueries",
+                "logs:GetLogGroupFields",
+                "guardduty:Get*",
+                "guardduty:List*",
+                "guardduty:Describe*",
+                "securityhub:Get*",
+                "securityhub:List*",
+                "securityhub:Describe*",
+                "securityhub:BatchGet*",
+                "config:Describe*",
+                "config:Get*",
+                "config:List*",
+                "config:BatchGet*",
+                "config:SelectResourceConfig",
+                "access-analyzer:Get*",
+                "access-analyzer:List*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*",
+            "Sid": "ReadSecurityLogsAndFindings"
+        },
+        {
+            "Action": [
+                "cloudtrail:StopLogging",
+                "cloudtrail:DeleteTrail",
+                "cloudtrail:UpdateTrail",
+                "cloudtrail:PutEventSelectors",
+                "cloudtrail:PutInsightSelectors",
+                "cloudtrail:CreateTrail",
+                "logs:Delete*",
+                "logs:Put*",
+                "logs:Create*",
+                "logs:Disassociate*",
+                "guardduty:Create*",
+                "guardduty:Delete*",
+                "guardduty:Update*",
+                "guardduty:Archive*",
+                "guardduty:Unarchive*",
+                "guardduty:Disassociate*",
+                "guardduty:StopMonitoringMembers",
+                "securityhub:Batch*Update*",
+                "securityhub:Update*",
+                "securityhub:Delete*",
+                "securityhub:Disable*",
+                "securityhub:Create*",
+                "config:Delete*",
+                "config:Put*",
+                "config:Stop*",
+                "config:Start*",
+                "access-analyzer:Create*",
+                "access-analyzer:Delete*",
+                "access-analyzer:Update*",
+                "access-analyzer:Apply*",
+                "iam:*",
+                "sso:*",
+                "sso-directory:*",
+                "identitystore:*",
+                "organizations:*"
+            ],
+            "Effect": "Deny",
+            "Resource": "*",
+            "Sid": "DenyTamperingWithSecurityTooling"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+----------------------------------------------------------------
+{
+    "Name": "ViewOnlyAccess",
+    "SessionDuration": "PT2H",
+    "Description": "Auditor: resource metadata plus read on approved compliance evidence.",
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-7f810ccd7e6c7d61"
+}
+Managed policies:
+[
+    "arn:aws:iam::aws:policy/job-function/ViewOnlyAccess"
+]
+Inline policy:
+(none)
+----------------------------------------------------------------
+{
+    "Name": "ReadOnlyAccess",
+    "SessionDuration": "PT4H",
+    "Description": "Read-only access to the load-documentation app account.",
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-f2f5cc63cd02c047"
+}
+Managed policies:
+[
+    "arn:aws:iam::aws:policy/ReadOnlyAccess"
+]
+Inline policy:
+(none)
+----------------------------------------------------------------
+{
+    "Name": "HelpDesk",
+    "SessionDuration": "PT4H",
+    "Description": "Custom least-privilege: view EC2 and IAM for troubleshooting; no changes.",
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-297750e02d9bd64f"
+}
+Managed policies:
+[]
+Inline policy:
+{
+    "Statement": [
+        {
+            "Action": [
+                "ec2:Describe*",
+                "ec2:GetConsoleOutput",
+                "ec2:GetConsoleScreenshot",
+                "elasticloadbalancing:Describe*",
+                "autoscaling:Describe*",
+                "cloudwatch:Describe*",
+                "cloudwatch:Get*",
+                "cloudwatch:List*",
+                "ssm:DescribeInstanceInformation"
+            ],
+            "Effect": "Allow",
+            "Resource": "*",
+            "Sid": "ViewEC2ForTroubleshooting"
+        },
+        {
+            "Action": [
+                "iam:Get*",
+                "iam:List*",
+                "iam:GenerateCredentialReport",
+                "iam:GenerateServiceLastAccessedDetails",
+                "access-analyzer:List*",
+                "access-analyzer:Get*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*",
+            "Sid": "ViewIAMForAccessQuestions"
+        },
+        {
+            "Action": [
+                "health:Describe*",
+                "support:Describe*"
+            ],
+            "Effect": "Allow",
+            "Resource": "*",
+            "Sid": "ViewServiceHealthAndSupport"
+        },
+        {
+            "Action": [
+                "ec2:TerminateInstances",
+                "ec2:StopInstances",
+                "ec2:Delete*",
+                "ec2:ModifyInstanceAttribute",
+                "ec2:AuthorizeSecurityGroup*",
+                "ec2:RevokeSecurityGroup*",
+                "iam:Create*",
+                "iam:Delete*",
+                "iam:Update*",
+                "iam:Put*",
+                "iam:Attach*",
+                "iam:Detach*",
+                "iam:Add*",
+                "iam:Remove*",
+                "iam:ChangePassword",
+                "iam:ResetServiceSpecificCredential",
+                "iam:EnableMFADevice",
+                "iam:DeactivateMFADevice",
+                "iam:ResyncMFADevice",
+                "iam:PassRole",
+                "sso:*",
+                "sso-directory:*",
+                "identitystore:Create*",
+                "identitystore:Delete*",
+                "identitystore:Update*",
+                "organizations:*"
+            ],
+            "Effect": "Deny",
+            "Resource": "*",
+            "Sid": "DenyDestructiveAndCredentialChanges"
+        }
+    ],
+    "Version": "2012-10-17"
+}
+----------------------------------------------------------------
