@@ -78,3 +78,9 @@ Observation: CloudTrail can see the denials, so a SecurityAnalyst-run query for 
 - Every account assignment is group-based, so each fix was a single membership change.
 - All users had MFA registered, and the admin uses a security key.
 - No one held both an admin role and a reviewer or monitoring role.
+
+## Repository hygiene finding: AWS account ID in screenshots (2026-11-02)
+
+- **Finding:** The AWS account ID (and ARNs/S3 bucket names containing it) was visible in screenshots 15–19 as originally committed.
+- **Remediation:** Screenshots 15–19 were redacted (pixelated/blurred) in a new commit. Future screenshots are redacted before commit.
+- **History:** Git history was not rewritten. Earlier commits still contain the unredacted images. This is an accepted risk: AWS states account IDs are not secrets, but exposure is minimized as good practice. No credentials or access keys were exposed.
