@@ -29,7 +29,9 @@
 |  [ Billing Alarm ]         ***Built***                                |
 |     └── CloudWatch Billing alerts (Free Tier usage Alerts)
 
-|     └── Budget (Zero spend budget or Monthly cost budget = $5)        |
+|     └── Budget (Zero spend budget or Monthly cost budget = $5) 
+    [ CloudTrail ]    ***Partial***                                |
+|     └── For Event History Only (01-billing-alarm, 02-identity-center) -->   |       |
 =========================================================================
         ^
         | (HTTPS / Encrypted Transit)
@@ -41,7 +43,7 @@
 
 
 
-3. **What's outside it.** What is outside of it right now is company data and artifacts. 
+3. **What's outside it.** Real company and driver data, ELD/telematics systems, EC2 instances, and networking infrastructure are outside this lab’s scope. The lab uses test identities only. The telematics connection shown in the diagram is conceptual and has not been built.
 4. **Data and users.** Test identities only, with no real customer data
 
 
