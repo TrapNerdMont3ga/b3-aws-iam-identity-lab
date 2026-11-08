@@ -31,9 +31,9 @@
 |          alarm, 02-identity-center)                                    | 
 |                                                                        |
 |  [ Billing Alarm ]         ***Built***                                 |
-|     └── CloudWatch Billing alerts (Free Tier usage Alerts).            |
+|     └── CloudWatch Billing alarm  (Free Tier usage Alerts).            |
 |     └── AWS Budget: b3-iam-lab-monthly-5-usd — $5 USD monthly cost     |
-|          budget.         |
+|          budget.                                                       |
 |    [ CloudTrail ]    ***Partial***                                     |
 |     └── For Event History Only (Event History only; no trail found in  |
 |    us-east-1. Other regions not yet checked.) -->                      |
@@ -42,8 +42,8 @@
         | (HTTPS / Encrypted Transit)
 +-------|---------------------------------------------------------------+
 
-|  EXTERNAL INTERCONNECTIONS    ***Not Built***                          |
-|  [ In-Cabin ELD / GPS Hardware in Trucks ] -> [ Telematics Provider API ]
+|    EXTERNAL INTERCONNECTIONS    ***Not Built***                        |
+|  [ In-Cabin ELD / GPS Hardware in Truck ] -> [ Telematic Provider API ]|
 +-----------------------------------------------------------------------+
 ``` 
 
