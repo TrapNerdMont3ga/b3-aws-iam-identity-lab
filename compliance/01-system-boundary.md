@@ -31,7 +31,7 @@
 |          alarm, 02-identity-center)                                    | 
 |                                                                        |
 |  [ Billing Alarm ]         ***Built***                                 |
-|     └── CloudWatch Billing alarm  (Free Tier usage Alerts).            |
+|     └── CloudWatch Billing alarm             |
 |     └── AWS Budget: b3-iam-lab-monthly-5-usd — $5 USD monthly cost     |
 |          budget.                                                       |
 |    [ CloudTrail ]    ***Partial***                                     |
