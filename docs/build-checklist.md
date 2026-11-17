@@ -166,5 +166,5 @@ cd terraform/02-identity-center && terraform destroy
 ## 9. Publish
 
 - [ ] `git status`: confirm no `*.tfstate`, `terraform.tfvars`, `.terraform/`, or unredacted screenshots are staged.
-- [ ] Optional scan: `git log -p | grep -E '[0-9]{12}|AKIA|aws_secret'` (only the example `111111111111` should appear).
+- [ ] Optional scan: `git log -p | grep -E '[0-9]{12}|AKIA|aws_secret'` (only the dummy placeholders `123456789012` and `111111111111` should appear).
 - [ ] Create the public GitHub repo, add the remote, push.

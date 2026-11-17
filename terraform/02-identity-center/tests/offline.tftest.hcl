@@ -10,7 +10,7 @@ mock_provider "aws" {
 }
 
 variables {
-  target_account_id = "111111111111"
+  target_account_id = "123456789012"
 }
 
 run "plans_expected_resources" {
