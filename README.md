@@ -28,6 +28,7 @@ Analyst work: provisioning, deprovisioning, MFA problems, "why can't I access X"
 | MFA and least-privilege evidence | Screenshots 15 to 19 (see [Screenshots](#screenshots)); CloudTrail MFA sign-ins in [13-mfa-signin-events.txt](evidence/cli/13-mfa-signin-events.txt); denied RunInstances/CreateBucket in [12-persona-denied-actions.txt](evidence/cli/12-persona-denied-actions.txt); IAM policy simulator in [11-policy-simulator.txt](evidence/cli/11-policy-simulator.txt); offline policy tests in `terraform/02-identity-center/tests/` |
 | Deployment proof (CLI) | [evidence/cli/](evidence/cli/), regenerate with `scripts/verify_identity_center.sh <account-id>` |
 | Findings and remediation | [docs/findings-and-remediation.md](docs/findings-and-remediation.md) (sample until real evidence exists) |
+| Compliance pack (system boundary, control matrix, POA&M) | [compliance/01-system-boundary.md](compliance/01-system-boundary.md), [compliance/control-matrix.md](compliance/control-matrix.md), [compliance/poam.md](compliance/poam.md) |
 
 ## Goal
 
@@ -63,7 +64,20 @@ Account IDs come from `terraform.tfvars`, which is git-ignored.
 | **No long-lived credentials** | Users get temporary credentials from the access portal or `aws sso login`. No IAM users or access keys for people. |
 | **Group-based access** | Every account assignment targets a group, never an individual user (asserted in tests). |
 
+## Compliance pack
+
+The approved, evidence-based control status and the open POA&M as of 2026-11-22 are in this folder (the system boundary draft was already there):
+
+- [compliance/01-system-boundary.md](compliance/01-system-boundary.md) — system boundary (draft, 2026-11-08)
+- [compliance/control-matrix.md](compliance/control-matrix.md) — NIST SP 800-53 Rev. 5 control matrix
+- [compliance/poam.md](compliance/poam.md) — plan of action and milestones
+
+That matrix is the status of record. The documentation crosswalk below was written earlier and overstates MFA: IA-2(1) is **Planned**, not implemented, until Identity Center MFA enforcement is confirmed.
+
 ## Mapping to NIST SP 800-53 Rev. 5
+
+> **Note:** For current status and evidence, use [compliance/control-matrix.md](compliance/control-matrix.md). The table below is the earlier documentation crosswalk and is not the approval record.
+
 
 | Control | Title | Implementation in this lab | Evidence |
 |---|---|---|---|
@@ -79,6 +93,10 @@ Related: AC-5 (Separation of Duties) through the SoD validation rule.
 ```
 .
 ├── README.md
+├── compliance/
+│   ├── 01-system-boundary.md         system boundary draft
+│   ├── control-matrix.md             approved 800-53 control status and evidence
+│   └── poam.md                       plan of action and milestones
 ├── diagrams/            architecture.mmd, architecture.png
 ├── docs/
 │   ├── build-checklist.md            exact console/CLI steps + screenshots to capture
