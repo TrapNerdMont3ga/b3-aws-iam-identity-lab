@@ -4,7 +4,7 @@ Permission sets: session duration, managed policies, inline policy
     "Name": "AdministratorAccess",
     "SessionDuration": "PT1H",
     "Description": "Full admin for a small group. 1h session to limit privileged exposure.",
-    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-000733998d1e4214"
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-EXAMPLE0000000000/ps-000733998d1e4214"
 }
 Managed policies:
 [
@@ -17,7 +17,7 @@ Inline policy:
     "Name": "SecurityAnalyst",
     "SessionDuration": "PT4H",
     "Description": "Read-only access to security logs and findings. No write.",
-    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-8bffb71b29ec6e0a"
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-EXAMPLE0000000000/ps-8bffb71b29ec6e0a"
 }
 Managed policies:
 []
@@ -112,7 +112,7 @@ Inline policy:
     "Name": "ViewOnlyAccess",
     "SessionDuration": "PT2H",
     "Description": "Auditor: resource metadata plus read on approved compliance evidence.",
-    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-7f810ccd7e6c7d61"
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-EXAMPLE0000000000/ps-7f810ccd7e6c7d61"
 }
 Managed policies:
 [
@@ -125,7 +125,7 @@ Inline policy:
     "Name": "ReadOnlyAccess",
     "SessionDuration": "PT4H",
     "Description": "Read-only access to the load-documentation app account.",
-    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-f2f5cc63cd02c047"
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-EXAMPLE0000000000/ps-f2f5cc63cd02c047"
 }
 Managed policies:
 [
@@ -138,7 +138,7 @@ Inline policy:
     "Name": "HelpDesk",
     "SessionDuration": "PT4H",
     "Description": "Custom least-privilege: view EC2 and IAM for troubleshooting; no changes.",
-    "Arn": "arn:aws:sso:::permissionSet/ssoins-722300836252a8bb/ps-297750e02d9bd64f"
+    "Arn": "arn:aws:sso:::permissionSet/ssoins-EXAMPLE0000000000/ps-297750e02d9bd64f"
 }
 Managed policies:
 []

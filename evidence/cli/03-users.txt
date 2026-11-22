@@ -1,4 +1,4 @@
-$ aws identitystore list-users --identity-store-id d-9066636886 --query Users[].{UserName:UserName,DisplayName:DisplayName,Title:Title,Email:Emails[0].Value} --output table
+$ aws identitystore list-users --identity-store-id d-EXAMPLE000 --query Users[].{UserName:UserName,DisplayName:DisplayName,Title:Title,Email:Emails[0].Value} --output table
 
 ------------------------------------------------------------------------------------------------------------
 |                                                 ListUsers                                                |

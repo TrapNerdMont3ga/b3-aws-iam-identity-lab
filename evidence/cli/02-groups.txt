@@ -1,4 +1,4 @@
-$ aws identitystore list-groups --identity-store-id d-9066636886 --query Groups[].{Group:DisplayName,Description:Description,GroupId:GroupId} --output table
+$ aws identitystore list-groups --identity-store-id d-EXAMPLE000 --query Groups[].{Group:DisplayName,Description:Description,GroupId:GroupId} --output table
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 |                                                                       ListGroups                                                                        |

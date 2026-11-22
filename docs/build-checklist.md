@@ -24,7 +24,7 @@ Nothing in this lab is expected to cost money.
 | 6. Persona sign-in tests | **Done** by Lamont: `jdoe.helpdesk` and `jgarcia.secanalyst` signed in with MFA. Denials captured. | Screenshots 15 to 19, `evidence/cli/12`, `13` |
 | 7. Findings simulation | Pending | Screenshots 12 to 14 |
 
-AWS access portal URL: `https://d-9066636886.awsapps.com/start`
+AWS access portal URL: `https://d-EXAMPLE000.awsapps.com/start`
 
 ## 0. Account hygiene and cost guardrail (console, as root, done once)
 
