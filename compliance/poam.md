@@ -2,7 +2,7 @@
 
 - **System:** B3 AWS IAM Identity Lab (fictional OptiPrim3 workforce access). Boundary: [01-system-boundary.md](01-system-boundary.md). Control status: [control-matrix.md](control-matrix.md).
 - **Date:** 2026-11-22
-- **Status:** Updated 2026-11-22 after evidence capture. Two items closed; three remain open.
+- **Status:** Updated 2026-11-22 after evidence capture. Two items closed; three remain open. POAM-05 MFA is complete; that item stays open only for access-key confirmation.
 - **Capacity assumption:** 3–5 lab hours per week, starting the week of 2026-11-23. Thursday 2026-11-26 (Thanksgiving) is a day off, so that week is planned lightly.
 
 Milestones are calendar targets, not commitments to spend. Anything that creates AWS resources with a possible cost (especially a CloudTrail trail and its S3 bucket) stays at plan-only until the account owner approves.
@@ -15,7 +15,7 @@ Milestones are calendar targets, not commitments to spend. Anything that creates
 | POAM-02 | `tech-operator-lab` IAM user still exists | AC-6(5) | Medium — a standing privileged IAM user is residual admin access outside the Identity Center permission-set model; risk is higher if its access key is still enabled (key state was not recaptured after apply). | 2026-12-07 | Closed 2026-11-22 |
 | POAM-03 | SNS budget-alert subscription unconfirmed | Cost guardrail (no direct 800-53 control) | Low — the $5 Budget and CloudWatch alarm exist, but alarm email may not be delivered until SNS is confirmed, and the Budget still does not cap spending. | 2026-11-25 | Open |
 | POAM-04 | MFA not confirmed enforced in Identity Center | IA-2(1) | Medium — two test sign-ins used password plus WebAuthn, but the Identity Center MFA enforcement setting has not been confirmed, so password-only access may still be allowed. | 2026-12-02 | Closed 2026-11-22 |
-| POAM-05 | `trapnerd-admin` IAM user has no MFA | AC-6(5), IA-2(1), AC-2 | Medium-High — an admin-named IAM user with long-term credentials and no MFA is not covered by the Identity Center always-on MFA policy; compromise of its password or access keys would give standing privileged access. | 2026-12-07 | Open |
+| POAM-05 | `trapnerd-admin` long-term access key not confirmed deactivated or removed | AC-6(5), AC-2 | Medium-High — a passkey MFA device is now assigned, but the user summary still shows Access key 1; access keys bypass console MFA and remain standing privileged credentials until deactivated or deleted. | 2026-12-07 | Open |
 
 ## Items
 
@@ -34,7 +34,7 @@ Milestones are calendar targets, not commitments to spend. Anything that creates
 - **Weakness:** Terraform was applied with a dedicated IAM user, `tech-operator-lab` (AdministratorAccess). That user was still listed in the captured caller-identity evidence and was called out as a remaining teardown step. This was the gap that originally kept AC-6(5) at Partial.
 - **Control:** AC-6(5) Least Privilege | Privileged Accounts.
 - **Risk:** Medium — privileged standing access existed outside the Identity Center group and session-duration controls. The earlier evidence did not show whether the access key was still active, so it was treated as residual admin access until the user was gone.
-- **Remediation:** The account owner (Lamont) deleted the `tech-operator-lab` IAM user on 2026-11-22. The IAM users list after deletion shows `trapnerd-admin` and `trapnerdMont3ga` only. AC-6(5) remains Partial because `trapnerd-admin` has no MFA; that remaining gap is tracked as [POAM-05](#poam-05-trapnerd-admin-iam-user-has-no-mfa).
+- **Remediation:** The account owner (Lamont) deleted the `tech-operator-lab` IAM user on 2026-11-22. The IAM users list after deletion shows `trapnerd-admin` and `trapnerdMont3ga` only. AC-6(5) remains Partial because `trapnerd-admin` still has a long-term access key that has not been confirmed deactivated or removed; that remaining gap is tracked as [POAM-05](#poam-05-trapnerd-admin-access-key-still-present).
 - **Milestone / target date:** 2026-12-07 (closed early, 2026-11-22).
 - **Status:** Closed 2026-11-22
 - **Evidence of closure:** `screenshots/poam-02-delete-tech-operator-lab-confirm.png` (delete confirmation for `tech-operator-lab`); `screenshots/poam-02-tech-operator-lab-deleted.png` (success banner, and the user is no longer in the IAM users list). Earlier evidence of the weakness: `evidence/cli/00-caller-identity.txt`; `docs/build-checklist.md`.
@@ -55,17 +55,18 @@ Milestones are calendar targets, not commitments to spend. Anything that creates
 - **Weakness:** Identity Center MFA enforcement (prompt on every sign-in; require device registration at first sign-in) had not been confirmed. The originally planned evidence file `screenshots/07-mfa-settings.png` had not been captured. Two fictional personas enrolled a device and later signed in with `CredentialType=PASSWORD,WEBAUTHN`, which showed MFA was used for those tests, not that the org-level setting was enforced for every user.
 - **Control:** IA-2(1) Identification and Authentication (Organizational Users) | Multi-Factor Authentication.
 - **Risk:** Medium — test sign-ins used WebAuthn, but without a confirmed always-on MFA policy, password-only access may still have been possible, including for privileged permission sets.
-- **Remediation:** The account owner opened IAM Identity Center > Settings > Authentication and confirmed MFA is set to "Every time they sign in (always-on)" and "Require them to register an MFA device at sign in". Allowed methods are authenticator apps, security keys, and built-in authenticators; users and administrators can add and manage MFA devices. Evidence was captured as `screenshots/poam-04-identity-center-mfa-always-on.png`, which replaces the planned `screenshots/07-mfa-settings.png` path. IA-2(1) is Implemented for Identity Center sign-ins. A separate gap — a legacy IAM user without MFA — is tracked as [POAM-05](#poam-05-trapnerd-admin-iam-user-has-no-mfa).
+- **Remediation:** The account owner opened IAM Identity Center > Settings > Authentication and confirmed MFA is set to "Every time they sign in (always-on)" and "Require them to register an MFA device at sign in". Allowed methods are authenticator apps, security keys, and built-in authenticators; users and administrators can add and manage MFA devices. Evidence was captured as `screenshots/poam-04-identity-center-mfa-always-on.png`, which replaces the planned `screenshots/07-mfa-settings.png` path. IA-2(1) is Implemented for Identity Center sign-ins. A passkey was later assigned to the remaining IAM user `trapnerd-admin` (IA-2(1) for that user is complete); the leftover access key is tracked as [POAM-05](#poam-05-trapnerd-admin-access-key-still-present).
 - **Milestone / target date:** 2026-12-02 (closed early, 2026-11-22).
 - **Status:** Closed 2026-11-22
 - **Evidence of closure:** `screenshots/poam-04-identity-center-mfa-always-on.png` (Identity Center Settings > Authentication: always-on MFA, required device registration at sign-in, allowed device types, and user/admin device management). Supporting test records: `evidence/cli/13-mfa-signin-events.txt`; `screenshots/19-cloudtrail-event-history.png`.
 
-### POAM-05: `trapnerd-admin` IAM user has no MFA
+### POAM-05: `trapnerd-admin` access key still present
 
-- **Weakness:** The IAM user `trapnerd-admin` remains in the account. It is admin-named, uses long-term IAM credentials (not Identity Center temporary credentials), and its MFA column is blank. Last activity was 14 days before 2026-11-22 (about 2026-11-08). This is residual privileged standing access outside the Identity Center MFA-enforced workforce model closed in POAM-04.
-- **Control:** AC-6(5) Least Privilege | Privileged Accounts; IA-2(1) Identification and Authentication (Organizational Users) | Multi-Factor Authentication; AC-2 Account Management.
-- **Risk:** Medium-High — an admin-named IAM user with long-term credentials and no MFA can be used if its password or any access key is compromised, and it is not covered by the Identity Center always-on MFA policy.
-- **Planned remediation:** The account owner either enables MFA on `trapnerd-admin`, or retires the user in favor of Identity Center and removes its access keys. Prefer retirement if the user is no longer needed for lab or break-glass use.
+- **Weakness:** The IAM user `trapnerd-admin` remains in the account. It is admin-named and uses long-term IAM credentials (not Identity Center temporary credentials). Last activity was 14 days before 2026-11-22 (about 2026-11-08). The MFA gap is closed; the remaining weakness is a long-term access key.
+- **Control:** AC-6(5) Least Privilege | Privileged Accounts; AC-2 Account Management. (IA-2(1) for this user is addressed by the passkey assignment below.)
+- **Risk:** Medium-High — Access key 1 is still shown on the user summary. Access keys are long-term credentials and are not protected by the passkey MFA device, so a compromised key would still give standing privileged access.
+- **Remediation (MFA, complete):** The account owner (Lamont) assigned a passkey MFA device to `trapnerd-admin` on 2026-11-22. Evidence: `screenshots/poam-05-trapnerd-admin-passkey-mfa-assigned.png` (banner "Passkey MFA device assigned"; user `trapnerd-admin`; account alias Optiprim3).
+- **Remaining remediation:** Confirm that Access key 1 on `trapnerd-admin` is deactivated or deleted (or retire the user in favor of Identity Center and remove its keys). Recapture redacted evidence of the key state. This item stays Open until that confirmation.
 - **Milestone / target date:** 2026-12-07 (week of 2026-12-07). Same window as the original privileged-user teardown (POAM-02).
-- **Status:** Open
-- **Evidence of the weakness:** `screenshots/poam-02-tech-operator-lab-deleted.png` (IAM users list after `tech-operator-lab` was deleted; `trapnerd-admin` is listed with last activity 14 days ago and a blank MFA column).
+- **Status:** Open (MFA complete 2026-11-22; open for access-key confirmation)
+- **Evidence:** MFA complete: `screenshots/poam-05-trapnerd-admin-passkey-mfa-assigned.png`. Earlier weakness (blank MFA column, before the passkey was assigned): `screenshots/poam-02-tech-operator-lab-deleted.png`. The passkey screenshot also shows the Summary labels ARN, Console access, and Access key 1; values were cropped off the bottom of the frame, so key status is not yet evidenced.

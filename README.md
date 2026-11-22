@@ -72,7 +72,7 @@ The approved, evidence-based control status and the open POA&M as of 2026-11-22 
 - [compliance/control-matrix.md](compliance/control-matrix.md) — NIST SP 800-53 Rev. 5 control matrix
 - [compliance/poam.md](compliance/poam.md) — plan of action and milestones
 
-That matrix is the status of record. The documentation crosswalk below was written earlier. IA-2(1) is **Implemented** for Identity Center sign-ins (always-on MFA); a legacy IAM user without MFA is tracked in POAM-05.
+That matrix is the status of record. The documentation crosswalk below was written earlier. IA-2(1) is **Implemented** for Identity Center sign-ins (always-on MFA) and for `trapnerd-admin` (passkey assigned). POAM-05 stays open only until that user's access key is confirmed deactivated or removed.
 
 ## Mapping to NIST SP 800-53 Rev. 5
 
@@ -176,9 +176,10 @@ The console header in these screenshots shows the AWS account ID. Account IDs ar
 | 18 | [18-secanalyst-cloudtrail-createtrail-denied.png](screenshots/18-secanalyst-cloudtrail-createtrail-denied.png) | SecurityAnalyst tries **Create trail**: `AccessDenied` on `s3:CreateBucket`, so no trail and no bucket were created. The analyst can't set up or change logging (CloudTrail writes are also explicitly denied). |
 | 19 | [19-cloudtrail-event-history.png](screenshots/19-cloudtrail-event-history.png) | CloudTrail event history (write events) as the SecurityAnalyst: persona sign-ins with `CredentialChallenge`/`CredentialVerification` (password + MFA). Also shows `jdoe.helpdesk` **RunInstances** (denied, `Client.UnauthorizedOperation`) and `jgarcia.secanalyst` **CreateBucket** (denied). The SecurityAnalyst can read the audit trail (AC-2(4), AU-6). |
 | — | [poam-02-delete-tech-operator-lab-confirm.png](screenshots/poam-02-delete-tech-operator-lab-confirm.png) | POAM-02 closure: delete confirmation for the `tech-operator-lab` IAM user (account ID redacted). |
-| — | [poam-02-tech-operator-lab-deleted.png](screenshots/poam-02-tech-operator-lab-deleted.png) | POAM-02 closure: user deleted. Also shows `trapnerd-admin` with a blank MFA column (POAM-05). |
+| — | [poam-02-tech-operator-lab-deleted.png](screenshots/poam-02-tech-operator-lab-deleted.png) | POAM-02 closure: user deleted. Earlier view of `trapnerd-admin` with a blank MFA column, before the passkey was assigned. |
 | — | [poam-03-budget-alert-email.png](screenshots/poam-03-budget-alert-email.png) | POAM-03 update: $5 budget forecast alert email received 2026-11-11 (account ID and inbox counts redacted). SNS confirmation still pending. |
 | — | [poam-04-identity-center-mfa-always-on.png](screenshots/poam-04-identity-center-mfa-always-on.png) | POAM-04 closure / IA-2(1): Identity Center MFA is always-on, device registration is required at sign-in (captured in place of the planned `07-mfa-settings.png`). |
+| — | [poam-05-trapnerd-admin-passkey-mfa-assigned.png](screenshots/poam-05-trapnerd-admin-passkey-mfa-assigned.png) | POAM-05 MFA complete: passkey MFA device assigned to `trapnerd-admin`. Summary still shows Access key 1; key status not yet confirmed. |
 
 Supporting CLI proof for these: [evidence/cli/12-persona-denied-actions.txt](evidence/cli/12-persona-denied-actions.txt) (full error messages for the denied RunInstances and CreateBucket calls; 0 EC2 instances in any region afterward) and [evidence/cli/13-mfa-signin-events.txt](evidence/cli/13-mfa-signin-events.txt) (sign-ins with `CredentialType=PASSWORD,WEBAUTHN` and MFA device enrollment at first sign-in).
 
