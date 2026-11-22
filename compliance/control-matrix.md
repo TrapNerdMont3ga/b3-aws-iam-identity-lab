@@ -8,6 +8,21 @@
 
 Open weaknesses are tracked in [poam.md](poam.md).
 
+## How to read control IDs
+
+NIST SP 800-53 groups controls into 20 families. The two letters name the family, the number is the control, and a number in parentheses is an enhancement (a stricter add-on), e.g. AC-6(5).
+
+| Family | Name | Used here |
+|---|---|---|
+| AC | Access Control: who gets in and what they can do | AC-2 Account Management, AC-3 Access Enforcement, AC-6 Least Privilege, AC-6(5) Privileged Accounts |
+| IA | Identification and Authentication: proving who someone is | IA-2 Identification and Authentication, IA-2(1) MFA for privileged accounts |
+| AU | Audit and Accountability: logging what happens | AU-2 Event Logging, AU-12 Audit Record Generation |
+| CM | Configuration Management: known, controlled system state | CM-2 Baseline Configuration |
+| SI | System and Information Integrity | SI-12 Information Management and Retention |
+| SA | System and Services Acquisition | SA-8(33) Information Minimization |
+
+Other families: AT awareness and training, CA assessment and authorization, CP contingency planning, IR incident response, MA maintenance, MP media protection, PE physical and environmental, PL planning, PM program management, PS personnel security, PT PII processing and transparency, RA risk assessment, SC system and communications protection, SR supply chain risk management.
+
 ## Status summary
 
 | Status | Count | Controls |
