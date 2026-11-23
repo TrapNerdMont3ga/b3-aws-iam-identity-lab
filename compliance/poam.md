@@ -2,7 +2,7 @@
 
 - **System:** B3 AWS IAM Identity Lab (fictional OptiPrim3 workforce access). Boundary: [01-system-boundary.md](01-system-boundary.md). Control status: [control-matrix.md](control-matrix.md).
 - **Date:** 2026-11-22
-- **Status:** Updated 2026-11-22 after evidence capture. Four items closed (POAM-05 closed — risk accepted by the owner); one remains open (POAM-01).
+- **Status:** Updated 2026-11-23. Four items closed (POAM-05 closed — risk accepted by the owner); POAM-01 remains open (design drafted, awaiting owner approval to apply).
 - **Capacity assumption:** 3–5 lab hours per week, starting the week of 2026-11-23. Thursday 2026-11-26 (Thanksgiving) is a day off, so that week is planned lightly.
 
 Milestones are calendar targets, not commitments to spend. Anything that creates AWS resources with a possible cost (especially a CloudTrail trail and its S3 bucket) stays at plan-only until the account owner approves.
@@ -11,7 +11,7 @@ Milestones are calendar targets, not commitments to spend. Anything that creates
 
 | ID | Weakness | Control | Risk | Milestone | Status |
 |---|---|---|---|---|---|
-| POAM-01 | No CloudTrail trail (Event History only) | AU-2, AU-12 | Medium — management events are visible for 90 days, but there is no durable trail or confirmed multi-region coverage, so audit evidence can lapse. | 2026-12-18 | Open |
+| POAM-01 | No CloudTrail trail (Event History only) | AU-2, AU-12 | Medium — management events are visible for 90 days, but there is no durable trail or confirmed multi-region coverage, so audit evidence can lapse. | 2026-12-18 | Open — design drafted, awaiting owner approval to apply |
 | POAM-02 | `tech-operator-lab` IAM user still exists | AC-6(5) | Medium — a standing privileged IAM user is residual admin access outside the Identity Center permission-set model; risk is higher if its access key is still enabled (key state was not recaptured after apply). | 2026-12-07 | Closed 2026-11-22 |
 | POAM-03 | SNS budget-alert subscription unconfirmed | Cost guardrail (no direct 800-53 control) | Low — the $5 Budget and CloudWatch alarm exist, but alarm email may not be delivered until SNS is confirmed, and the Budget still does not cap spending. | 2026-11-25 | Closed 2026-11-22 |
 | POAM-04 | MFA not confirmed enforced in Identity Center | IA-2(1) | Medium — two test sign-ins used password plus WebAuthn, but the Identity Center MFA enforcement setting has not been confirmed, so password-only access may still be allowed. | 2026-12-02 | Closed 2026-11-22 |
@@ -22,12 +22,13 @@ Milestones are calendar targets, not commitments to spend. Anything that creates
 ### POAM-01: No CloudTrail trail
 
 - **Weakness:** The lab relies on CloudTrail Event History only. No trail was found in `us-east-1` when the system boundary was drafted; other regions were not checked. Event History retains management events for 90 days and has no customer-managed log bucket.
-- **Control:** AU-2 Event Logging; AU-12 Audit Record Generation.
-- **Risk:** Medium — some audit visibility exists (the 2026-10-18 persona denials and sign-in events were retrieved from Event History), but records are not retained beyond 90 days and coverage outside the current region is unconfirmed.
-- **Planned remediation:** Design a free-tier-safe trail (management events only; the first copy of management events is typically no CloudTrail charge, but S3 storage is not free). Document the design, get a spend decision if any S3 cost is involved, then implement only after approval. Recapture evidence (trail status, bucket policy, a sample lookup) with identifiers redacted. Do not apply in this pass without that approval.
-- **Milestone / target date:** 2026-12-18 (week of 2026-12-14). Placed after the shorter console items so there is time to design and, if needed, ask about spend.
-- **Status:** Open
+- **Control:** AU-2 Event Logging; AU-12 Audit Record Generation. The design also addresses AU-3, AU-6, AU-9, and AU-11, which are not current matrix rows (see the design document).
+- **Risk:** Medium — some audit visibility exists (the 2026-10-18 persona denials and sign-in events were retrieved from Event History), but records are not retained beyond 90 days in an owner-controlled store and coverage outside the current region is unconfirmed.
+- **Planned remediation:** A free-tier-conscious trail design and gated Terraform module are drafted in [cloudtrail-trail-design.md](cloudtrail-trail-design.md) and `terraform/03-cloudtrail/`. The design is one multi-Region trail, management events only, no data events, no Lake or Insights, delivery to a private SSE-S3 bucket with Block Public Access, a CloudTrail-only bucket policy constrained by `aws:SourceArn`, log-file validation, and a 90-day lifecycle expiration. CloudWatch Logs integration is optional and off by default. The module default is `enable_cloudtrail = false`, so apply creates nothing until the account owner approves a plan with the flag set to true. Do not apply without that approval. After apply, capture the redacted evidence listed in the design document; only then can AU-2 and AU-12 move from Partial to Implemented.
+- **Milestone / target date:** 2026-12-18 (week of 2026-12-14). Apply remains blocked on owner approval and a reviewed plan.
+- **Status:** Open — design drafted, awaiting owner approval to apply
 - **Evidence of the weakness:** `compliance/01-system-boundary.md`; `screenshots/19-cloudtrail-event-history.png`; `evidence/cli/12-persona-denied-actions.txt`; `evidence/cli/13-mfa-signin-events.txt`.
+- **Design (not implementation evidence):** [cloudtrail-trail-design.md](cloudtrail-trail-design.md); `terraform/03-cloudtrail/`.
 
 ### POAM-02: `tech-operator-lab` IAM user still exists
 

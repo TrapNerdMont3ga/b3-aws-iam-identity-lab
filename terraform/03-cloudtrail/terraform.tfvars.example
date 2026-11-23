@@ -1,0 +1,10 @@
+# Copy to terraform.tfvars (git-ignored) and fill in real values.
+# Leave enable_cloudtrail = false until the account owner approves a plan.
+enable_cloudtrail     = false
+aws_region            = "us-east-1"
+trail_name            = "b3-iam-lab-management-events"
+# Must be globally unique. Do not commit the real name if it embeds an account ID.
+trail_bucket_name     = "b3-iam-lab-cloudtrail-logs-example"
+is_multi_region_trail = true
+log_retention_days    = 90
+enable_cloudwatch_logs = false
