@@ -66,11 +66,14 @@ Account IDs come from `terraform.tfvars`, which is git-ignored.
 
 ## Compliance pack
 
-The approved, evidence-based control status and the open POA&M as of 2026-11-22 are in this folder (the system boundary draft was already there):
+The approved, evidence-based control status and the POA&M as of 2026-11-23 are in this folder:
 
 - [compliance/01-system-boundary.md](compliance/01-system-boundary.md) — system boundary (draft, 2026-11-08)
-- [compliance/control-matrix.md](compliance/control-matrix.md) — NIST SP 800-53 Rev. 5 control matrix
+- [compliance/control-matrix.md](compliance/control-matrix.md) — NIST SP 800-53 Rev. 5 control matrix (status of record)
 - [compliance/poam.md](compliance/poam.md) — plan of action and milestones
+- [compliance/cloudtrail-trail-design.md](compliance/cloudtrail-trail-design.md) — POAM-01 CloudTrail trail design (drafted; not applied)
+- [compliance/ssp-lite.md](compliance/ssp-lite.md) — system security plan (lite)
+- [compliance/crosswalk-soc2-iso27001.md](compliance/crosswalk-soc2-iso27001.md) — SOC 2 TSC and ISO/IEC 27001:2022 Annex A portfolio mapping (not an audit or attestation)
 
 That matrix is the status of record. The documentation crosswalk below was written earlier. IA-2(1) is **Implemented** for Identity Center sign-ins (always-on MFA) and for `trapnerd-admin` (passkey assigned). The residual risk of that user's long-term access key (used for an AWS-hosted website; access keys bypass MFA) was accepted by the owner on 2026-11-22 (POAM-05 closed — risk accepted). AC-6(5) stays Partial.
 
@@ -96,7 +99,10 @@ Related: AC-5 (Separation of Duties) through the SoD validation rule.
 ├── compliance/
 │   ├── 01-system-boundary.md         system boundary draft
 │   ├── control-matrix.md             approved 800-53 control status and evidence
-│   └── poam.md                       plan of action and milestones
+│   ├── poam.md                       plan of action and milestones
+│   ├── cloudtrail-trail-design.md    POAM-01 trail design (not yet applied)
+│   ├── ssp-lite.md                   system security plan (lite)
+│   └── crosswalk-soc2-iso27001.md    SOC 2 / ISO 27001 portfolio mapping
 ├── diagrams/            architecture.mmd, architecture.png
 ├── docs/
 │   ├── build-checklist.md            exact console/CLI steps + screenshots to capture
@@ -113,8 +119,9 @@ Related: AC-5 (Separation of Duties) through the SoD validation rule.
 │   └── verify_identity_center.sh     collects redacted CLI evidence into evidence/cli/
 └── terraform/
     ├── 01-billing-alarm/       deploy FIRST: CloudWatch billing alarm + SNS email (us-east-1)
-    └── 02-identity-center/     groups, users, permission sets, account assignments
-        └── tests/offline.tftest.hcl
+    ├── 02-identity-center/     groups, users, permission sets, account assignments
+    │   └── tests/offline.tftest.hcl
+    └── 03-cloudtrail/          POAM-01 trail module; enable_cloudtrail is false until approved
 ```
 
 ## Build summary
