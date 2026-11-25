@@ -28,7 +28,7 @@ Analyst work: provisioning, deprovisioning, MFA problems, "why can't I access X"
 | MFA and least-privilege evidence | Screenshots 15 to 19 (see [Screenshots](#screenshots)); CloudTrail MFA sign-ins in [13-mfa-signin-events.txt](evidence/cli/13-mfa-signin-events.txt); denied RunInstances/CreateBucket in [12-persona-denied-actions.txt](evidence/cli/12-persona-denied-actions.txt); IAM policy simulator in [11-policy-simulator.txt](evidence/cli/11-policy-simulator.txt); offline policy tests in `terraform/02-identity-center/tests/` |
 | Deployment proof (CLI) | [evidence/cli/](evidence/cli/), regenerate with `scripts/verify_identity_center.sh <account-id>` |
 | Findings and remediation | [docs/findings-and-remediation.md](docs/findings-and-remediation.md) (sample until real evidence exists) |
-| Compliance pack (system boundary, control matrix, POA&M) | [compliance/01-system-boundary.md](compliance/01-system-boundary.md), [compliance/control-matrix.md](compliance/control-matrix.md), [compliance/poam.md](compliance/poam.md) |
+| Compliance pack (system boundary, control matrix, POA&M, SSP-lite, trail design) | [compliance/01-system-boundary.md](compliance/01-system-boundary.md), [compliance/control-matrix.md](compliance/control-matrix.md), [compliance/poam.md](compliance/poam.md), [compliance/ssp-lite.md](compliance/ssp-lite.md), [compliance/cloudtrail-trail-design.md](compliance/cloudtrail-trail-design.md), [compliance/crosswalk-soc2-iso27001.md](compliance/crosswalk-soc2-iso27001.md) |
 
 ## Goal
 
@@ -66,16 +66,16 @@ Account IDs come from `terraform.tfvars`, which is git-ignored.
 
 ## Compliance pack
 
-The approved, evidence-based control status and the POA&M as of 2026-11-23 are in this folder:
+The approved, evidence-based control status and the POA&M as of 2026-11-24 are in this folder:
 
 - [compliance/01-system-boundary.md](compliance/01-system-boundary.md) — system boundary (draft, 2026-11-08)
-- [compliance/control-matrix.md](compliance/control-matrix.md) — NIST SP 800-53 Rev. 5 control matrix (status of record)
-- [compliance/poam.md](compliance/poam.md) — plan of action and milestones
-- [compliance/cloudtrail-trail-design.md](compliance/cloudtrail-trail-design.md) — POAM-01 CloudTrail trail design (drafted; not applied)
+- [compliance/control-matrix.md](compliance/control-matrix.md) — NIST SP 800-53 Rev. 5 control matrix (status of record): **9 Implemented / 2 Partial**
+- [compliance/poam.md](compliance/poam.md) — plan of action and milestones (all five items closed)
+- [compliance/cloudtrail-trail-design.md](compliance/cloudtrail-trail-design.md) — POAM-01 CloudTrail trail (applied 2026-11-23; evidence 2026-11-24)
 - [compliance/ssp-lite.md](compliance/ssp-lite.md) — system security plan (lite)
 - [compliance/crosswalk-soc2-iso27001.md](compliance/crosswalk-soc2-iso27001.md) — SOC 2 TSC and ISO/IEC 27001:2022 Annex A portfolio mapping (not an audit or attestation)
 
-That matrix is the status of record. The documentation crosswalk below was written earlier. IA-2(1) is **Implemented** for Identity Center sign-ins (always-on MFA) and for `trapnerd-admin` (passkey assigned). The residual risk of that user's long-term access key (used for an AWS-hosted website; access keys bypass MFA) was accepted by the owner on 2026-11-22 (POAM-05 closed — risk accepted). AC-6(5) stays Partial.
+That matrix is the status of record. The documentation crosswalk below was written earlier. IA-2(1) is **Implemented** for Identity Center sign-ins (always-on MFA) and for `trapnerd-admin` (passkey assigned). AU-2 and AU-12 are **Implemented** (multi-Region management-events trail; SSE-S3, not KMS; SNS notification delivery off; CloudWatch Logs off). The residual risk of the leftover IAM user's long-term access key (used for an AWS-hosted website; access keys bypass MFA) was accepted by the owner on 2026-11-22 (POAM-05 closed — risk accepted). AC-6(5) and the cost guardrail stay Partial.
 
 ## Mapping to NIST SP 800-53 Rev. 5
 
@@ -100,7 +100,7 @@ Related: AC-5 (Separation of Duties) through the SoD validation rule.
 │   ├── 01-system-boundary.md         system boundary draft
 │   ├── control-matrix.md             approved 800-53 control status and evidence
 │   ├── poam.md                       plan of action and milestones
-│   ├── cloudtrail-trail-design.md    POAM-01 trail design (not yet applied)
+│   ├── cloudtrail-trail-design.md    POAM-01 trail design and evidence (applied 2026-11-23)
 │   ├── ssp-lite.md                   system security plan (lite)
 │   └── crosswalk-soc2-iso27001.md    SOC 2 / ISO 27001 portfolio mapping
 ├── diagrams/            architecture.mmd, architecture.png
@@ -121,7 +121,7 @@ Related: AC-5 (Separation of Duties) through the SoD validation rule.
     ├── 01-billing-alarm/       deploy FIRST: CloudWatch billing alarm + SNS email (us-east-1)
     ├── 02-identity-center/     groups, users, permission sets, account assignments
     │   └── tests/offline.tftest.hcl
-    └── 03-cloudtrail/          POAM-01 trail module; enable_cloudtrail is false until approved
+    └── 03-cloudtrail/          POAM-01 trail module (applied 2026-11-23); default enable_cloudtrail is still false
 ```
 
 ## Build summary
@@ -155,7 +155,7 @@ terraform plan && terraform apply
 
 - IAM Identity Center and AWS Organizations have no charge.
 - CloudWatch: the first 10 alarms are in the free tier. SNS email: the first 1,000 notifications per month are free.
-- CloudTrail event history (90 days of management events) is free. No paid trail is created.
+- CloudTrail Event History (90 days of management events) is free. The applied multi-Region management-events trail delivers the first copy of management events to S3 at no CloudTrail charge; S3 storage for those logs is typically well under $0.10 per month with 90-day expiration (estimate, not a quote). Data events, Insights, Lake, and CloudWatch Logs are off. Encryption is SSE-S3, not KMS. Trail SNS notification delivery is off.
 - GuardDuty, Security Hub, and Config are **not enabled** by this lab. The SecurityAnalyst permissions work whether or not those services are on. If you turn them on to test, use the 30-day free trials and disable them at teardown.
 - The optional evidence bucket costs essentially nothing for a few small files (S3 free tier covers 5 GB).
 - The billing alarm and a $5 Budget are set **before** anything else is built.
@@ -171,7 +171,7 @@ terraform plan && terraform apply
 
 ## Screenshots
 
-The console header in these screenshots shows the AWS account ID. Account IDs aren't secret, so it's left visible.
+Older numbered screenshots may still show a console account ID in the header. POA&M evidence screenshots redact 12-digit account IDs (and, where present, S3 object Owner canonical IDs and ETags) before commit.
 
 ### Captured
 
@@ -182,6 +182,13 @@ The console header in these screenshots shows the AWS account ID. Account IDs ar
 | 17 | [17-secanalyst-ec2-denied.png](screenshots/17-secanalyst-ec2-denied.png) | Signed in as `SecurityAnalyst/jgarcia.secanalyst`, the EC2 dashboard is mostly access denied (instances, volumes, security groups, `ec2:DescribeAvailabilityZones`). Security analysts get logs and findings, not infrastructure inventory. |
 | 18 | [18-secanalyst-cloudtrail-createtrail-denied.png](screenshots/18-secanalyst-cloudtrail-createtrail-denied.png) | SecurityAnalyst tries **Create trail**: `AccessDenied` on `s3:CreateBucket`, so no trail and no bucket were created. The analyst can't set up or change logging (CloudTrail writes are also explicitly denied). |
 | 19 | [19-cloudtrail-event-history.png](screenshots/19-cloudtrail-event-history.png) | CloudTrail event history (write events) as the SecurityAnalyst: persona sign-ins with `CredentialChallenge`/`CredentialVerification` (password + MFA). Also shows `jdoe.helpdesk` **RunInstances** (denied, `Client.UnauthorizedOperation`) and `jgarcia.secanalyst` **CreateBucket** (denied). The SecurityAnalyst can read the audit trail (AC-2(4), AU-6). |
+| — | [poam-01-cloudtrail-trail-details.png](screenshots/poam-01-cloudtrail-trail-details.png) | POAM-01 / AU-2 / AU-12: trail `b3-iam-lab-management-events` logging on, multi-Region, log-file validation enabled, SSE-KMS not enabled, SNS notification delivery disabled. Last log file delivered November 24, 2026, 21:05:57 (UTC-05:00) is the log-delivery evidence (account ID in the log path redacted). |
+| — | [poam-01-cloudtrail-management-events.png](screenshots/poam-01-cloudtrail-management-events.png) | POAM-01: management events only; API activity All. |
+| — | [poam-01-cloudtrail-block-public-access.png](screenshots/poam-01-cloudtrail-block-public-access.png) | POAM-01: log bucket Block all public access On. |
+| — | [poam-01-cloudtrail-default-encryption-sse-s3.png](screenshots/poam-01-cloudtrail-default-encryption-sse-s3.png) | POAM-01: bucket default encryption SSE-S3 (not KMS). |
+| — | [poam-01-cloudtrail-bucket-policy.png](screenshots/poam-01-cloudtrail-bucket-policy.png) | POAM-01: bucket policy allows CloudTrail only, constrained by `aws:SourceArn`. Account ID replaced with placeholder. |
+| — | [poam-01-cloudtrail-lifecycle-90d.png](screenshots/poam-01-cloudtrail-lifecycle-90d.png) | POAM-01: lifecycle rule `expire-cloudtrail-logs`, entire bucket, expire at day 90. |
+| — | [poam-01-cloudtrail-digest-log-file-validation.png](screenshots/poam-01-cloudtrail-digest-log-file-validation.png) | POAM-01: a `CloudTrail-Digest` object from 2026-11-23, proving log file validation (not delivery by itself). Account ID, Owner canonical ID, and ETag redacted. Treat with the trail-details screenshot as delivery and validation evidence. |
 | — | [poam-02-delete-tech-operator-lab-confirm.png](screenshots/poam-02-delete-tech-operator-lab-confirm.png) | POAM-02 closure: delete confirmation for the `tech-operator-lab` IAM user (account ID redacted). |
 | — | [poam-02-tech-operator-lab-deleted.png](screenshots/poam-02-tech-operator-lab-deleted.png) | POAM-02 closure: user deleted. Earlier view of `trapnerd-admin` with a blank MFA column, before the passkey was assigned. |
 | — | [poam-03-budget-alert-email.png](screenshots/poam-03-budget-alert-email.png) | POAM-03 supporting evidence: $5 budget forecast alert email received 2026-11-11 (account ID and inbox counts redacted). |
